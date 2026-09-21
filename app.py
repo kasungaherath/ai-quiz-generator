@@ -2,7 +2,7 @@ import streamlit as st
 
 from utils.pdf_reader import extract_text_from_pdf
 from utils.quiz_generator import generate_quiz
-
+from utils.quiz_utils import calculate_score
 
 # -----------------------------
 # Page Configuration
@@ -185,8 +185,9 @@ if generate_button:
 
 
 # -----------------------------
-# Temporary Quiz Preview
+# Display Quiz 
 # -----------------------------
+
 if "quiz" in st.session_state:
 
     st.subheader("Quiz")
@@ -195,13 +196,8 @@ if "quiz" in st.session_state:
 
     for index, question in enumerate(st.session_state.quiz):
 
-        st.write(
-            f"### Question {index + 1}"
-        )
-
-        st.write(
-            question["question"]
-        )
+        st.write(f"### Question {index + 1}")
+        st.write(question["question"])
 
         selected_answer = st.radio(
             "Choose your answer:",
@@ -213,7 +209,69 @@ if "quiz" in st.session_state:
         user_answers[index] = selected_answer
 
     st.session_state.user_answers = user_answers
+
     submit_button = st.button(
-    "Submit Quiz",
-    type="primary"
-)
+        "Submit Quiz",
+        type="primary"
+    )
+
+    if submit_button:
+
+        unanswered = [
+            index + 1
+            for index, answer in user_answers.items()
+            if answer is None
+        ]
+
+        if unanswered:
+            st.warning(
+                "Please answer all questions before submitting."
+            )
+
+        else:
+            score, results = calculate_score(
+                st.session_state.quiz,
+                user_answers
+            )
+
+            total = len(st.session_state.quiz)
+            percentage = (score / total) * 100
+
+            st.subheader("Quiz Results")
+
+            st.metric(
+                "Score",
+                f"{score}/{total}"
+            )
+
+            st.progress(percentage / 100)
+
+            st.write(
+                f"**Percentage: {percentage:.1f}%**"
+            )
+
+            st.subheader("Answer Review")
+
+            for index, result in enumerate(results):
+
+                st.write(
+                    f"### Question {index + 1}"
+                )
+
+                st.write(result["question"])
+
+                if result["is_correct"]:
+
+                    st.success(
+                        f"Correct: {result['correct_answer']}"
+                    )
+
+                else:
+
+                    st.error(
+                        f"Your answer: {result['user_answer']}"
+                    )
+
+                    st.info(
+                        f"Correct answer: {result['correct_answer']}"
+                    )
