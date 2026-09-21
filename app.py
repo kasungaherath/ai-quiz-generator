@@ -189,10 +189,31 @@ if generate_button:
 # -----------------------------
 if "quiz" in st.session_state:
 
-    st.subheader(
-        "Generated Quiz Preview"
-    )
+    st.subheader("Quiz")
 
-    st.write(
-        st.session_state.quiz
-    )
+    user_answers = {}
+
+    for index, question in enumerate(st.session_state.quiz):
+
+        st.write(
+            f"### Question {index + 1}"
+        )
+
+        st.write(
+            question["question"]
+        )
+
+        selected_answer = st.radio(
+            "Choose your answer:",
+            question["options"],
+            key=f"question_{index}",
+            index=None
+        )
+
+        user_answers[index] = selected_answer
+
+    st.session_state.user_answers = user_answers
+    submit_button = st.button(
+    "Submit Quiz",
+    type="primary"
+)
