@@ -5,9 +5,9 @@ from utils.quiz_generator import generate_quiz
 from utils.quiz_utils import calculate_score
 
 
-# ---------------------------------
+# --------------------------------------------------
 # Page Configuration
-# ---------------------------------
+# --------------------------------------------------
 st.set_page_config(
     page_title="AI Quiz Generator",
     page_icon="🧠",
@@ -15,20 +15,64 @@ st.set_page_config(
 )
 
 
-# ---------------------------------
-# App Header
-# ---------------------------------
-st.title("🧠 AI Quiz Generator")
+# --------------------------------------------------
+# Custom Styling
+# --------------------------------------------------
+st.markdown(
+    """
+    <style>
+    .block-container {
+        max-width: 900px;
+        padding-top: 2rem;
+        padding-bottom: 3rem;
+    }
 
-st.write(
-    "Generate AI-powered quizzes from your study notes "
-    "or uploaded PDF documents."
+    h1 {
+        text-align: center;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #777;
+        font-size: 1.05rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .result-box {
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
 )
 
 
-# ---------------------------------
+# --------------------------------------------------
+# Header
+# --------------------------------------------------
+st.title("🧠 AI Quiz Generator")
+
+st.markdown(
+    """
+    <p class="subtitle">
+        Upload study materials or paste your notes,
+        then generate an AI-powered quiz instantly.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+
+# --------------------------------------------------
 # Gemini API Key
-# ---------------------------------
+# --------------------------------------------------
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 
@@ -42,25 +86,28 @@ except KeyError:
     st.stop()
 
 
-# ---------------------------------
-# Study Material
-# ---------------------------------
-study_text = ""
+# --------------------------------------------------
+# Study Material Section
+# --------------------------------------------------
+st.divider()
 
-st.subheader("Study Material")
+st.subheader("📚 Study Material")
+
+study_text = ""
 
 input_method = st.radio(
     "Choose study material source:",
     [
         "Enter Text",
         "Upload PDF"
-    ]
+    ],
+    horizontal=True
 )
 
 
-# ---------------------------------
+# --------------------------------------------------
 # Text Input
-# ---------------------------------
+# --------------------------------------------------
 if input_method == "Enter Text":
 
     study_text = st.text_area(
@@ -73,9 +120,9 @@ if input_method == "Enter Text":
     )
 
 
-# ---------------------------------
+# --------------------------------------------------
 # PDF Upload
-# ---------------------------------
+# --------------------------------------------------
 else:
 
     uploaded_file = st.file_uploader(
@@ -129,20 +176,39 @@ else:
                 st.exception(error)
 
 
-# ---------------------------------
-# Quiz Settings
-# ---------------------------------
-st.subheader("Quiz Settings")
+# --------------------------------------------------
+# Quiz Settings Section
+# --------------------------------------------------
+st.divider()
+
+st.subheader("⚙️ Quiz Settings")
 
 
-question_type = st.selectbox(
-    "Question type",
-    [
-        "Multiple Choice",
-        "True/False",
-        "Mixed"
-    ]
-)
+col1, col2 = st.columns(2)
+
+
+with col1:
+
+    question_type = st.selectbox(
+        "Question type",
+        [
+            "Multiple Choice",
+            "True/False",
+            "Mixed"
+        ]
+    )
+
+
+with col2:
+
+    difficulty = st.selectbox(
+        "Difficulty",
+        [
+            "Easy",
+            "Medium",
+            "Hard"
+        ]
+    )
 
 
 num_questions = st.slider(
@@ -153,26 +219,19 @@ num_questions = st.slider(
 )
 
 
-difficulty = st.selectbox(
-    "Difficulty",
-    [
-        "Easy",
-        "Medium",
-        "Hard"
-    ]
-)
-
-
-# ---------------------------------
-# Generate Quiz
-# ---------------------------------
+# --------------------------------------------------
+# Generate Quiz Button
+# --------------------------------------------------
 generate_button = st.button(
-    "Generate Quiz",
+    "✨ Generate Quiz",
     type="primary",
     use_container_width=True
 )
 
 
+# --------------------------------------------------
+# Generate Quiz
+# --------------------------------------------------
 if generate_button:
 
     if not study_text.strip():
@@ -200,7 +259,7 @@ if generate_button:
 
                 st.session_state.quiz = quiz
 
-                # Clear old answers
+                # Remove previous selected answers
                 keys_to_delete = []
 
                 for key in st.session_state:
@@ -213,15 +272,17 @@ if generate_button:
                 for key in keys_to_delete:
                     del st.session_state[key]
 
-                if "quiz_submitted" in st.session_state:
-                    del st.session_state[
-                        "quiz_submitted"
-                    ]
 
-                if "results" in st.session_state:
-                    del st.session_state[
-                        "results"
-                    ]
+                # Remove previous results
+                for key in [
+                    "quiz_submitted",
+                    "results",
+                    "score"
+                ]:
+
+                    if key in st.session_state:
+                        del st.session_state[key]
+
 
             st.success(
                 "Quiz generated successfully!"
@@ -241,22 +302,23 @@ if generate_button:
                 st.exception(error)
 
 
-# ---------------------------------
+# --------------------------------------------------
 # Display Quiz
-# ---------------------------------
+# --------------------------------------------------
 if "quiz" in st.session_state:
 
     quiz = st.session_state.quiz
 
     st.divider()
 
-    st.subheader("Quiz")
+    st.subheader("📝 Quiz")
 
-    st.write(
-        f"Total questions: **{len(quiz)}**"
+    st.caption(
+        f"Total Questions: {len(quiz)}"
     )
 
     user_answers = {}
+
 
     for index, question in enumerate(quiz):
 
@@ -280,11 +342,11 @@ if "quiz" in st.session_state:
         st.divider()
 
 
-    # ---------------------------------
+    # --------------------------------------------------
     # Submit Quiz
-    # ---------------------------------
+    # --------------------------------------------------
     submit_button = st.button(
-        "Submit Quiz",
+        "✅ Submit Quiz",
         type="primary",
         use_container_width=True
     )
@@ -294,10 +356,10 @@ if "quiz" in st.session_state:
 
         unanswered = [
             index + 1
-            for index, answer
-            in user_answers.items()
+            for index, answer in user_answers.items()
             if answer is None
         ]
+
 
         if unanswered:
 
@@ -323,9 +385,9 @@ if "quiz" in st.session_state:
             st.session_state.score = score
 
 
-# ---------------------------------
+# --------------------------------------------------
 # Quiz Results
-# ---------------------------------
+# --------------------------------------------------
 if (
     "quiz_submitted" in st.session_state
     and st.session_state.quiz_submitted
@@ -333,9 +395,11 @@ if (
 
     st.divider()
 
-    st.subheader("Quiz Results")
+    st.subheader("🏆 Quiz Results")
+
 
     score = st.session_state.score
+
     results = st.session_state.results
 
     total = len(
@@ -347,52 +411,65 @@ if (
     ) * 100
 
 
-    # ---------------------------------
-    # Score
-    # ---------------------------------
-    st.metric(
-        "Score",
-        f"{score}/{total}"
-    )
+    # --------------------------------------------------
+    # Result Metrics
+    # --------------------------------------------------
+    col1, col2 = st.columns(2)
 
 
+    with col1:
+
+        st.metric(
+            "Score",
+            f"{score}/{total}"
+        )
+
+
+    with col2:
+
+        st.metric(
+            "Percentage",
+            f"{percentage:.1f}%"
+        )
+
+
+    # --------------------------------------------------
+    # Progress Bar
+    # --------------------------------------------------
     st.progress(
         percentage / 100
     )
 
 
-    st.write(
-        f"### {percentage:.1f}%"
-    )
-
-
-    # ---------------------------------
+    # --------------------------------------------------
     # Result Message
-    # ---------------------------------
+    # --------------------------------------------------
     if percentage >= 80:
 
         st.success(
-            "Excellent work!"
+            "🎉 Excellent work!"
         )
 
     elif percentage >= 60:
 
         st.info(
-            "Good job! Keep practicing."
+            "👍 Good job! Keep practicing."
         )
 
     else:
 
         st.warning(
-            "Keep studying and try again."
+            "📚 Keep studying and try again."
         )
 
 
-    # ---------------------------------
+    # --------------------------------------------------
     # Answer Review
-    # ---------------------------------
+    # --------------------------------------------------
+    st.divider()
+
     st.subheader(
-        "Answer Review"
+        "🔍 Answer Review"
     )
 
 
@@ -405,6 +482,7 @@ if (
         st.write(
             result["question"]
         )
+
 
         if result["is_correct"]:
 
@@ -425,16 +503,17 @@ if (
                 f"{result['correct_answer']}"
             )
 
+
         st.divider()
 
 
-# ---------------------------------
+# --------------------------------------------------
 # Create New Quiz
-# ---------------------------------
+# --------------------------------------------------
 if "quiz" in st.session_state:
 
     if st.button(
-        "Create New Quiz",
+        "🔄 Create New Quiz",
         use_container_width=True
     ):
 
