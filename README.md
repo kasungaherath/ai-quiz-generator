@@ -42,7 +42,7 @@ The application automatically evaluates answers, calculates the score and percen
 
 ## 📁 Project Structure
 
-```text
+
 ai-quiz-generator/
 │
 ├── app.py
@@ -61,70 +61,66 @@ ai-quiz-generator/
 
 
 
-⚙️ Installation
+##⚙️ Installation
 
-Clone the repository:
+-Clone the repository:
 
 git clone https://github.com/YOUR_USERNAME/ai-quiz-generator.git
 
-Move into the project folder:
+-Move into the project folder:
 
 cd ai-quiz-generator
 
-Create a virtual environment:
+-Create a virtual environment:
 
 python -m venv venv
 
-Activate it on Windows:
+-Activate it on Windows:
 
 venv\Scripts\activate
 
-Install the required packages:
+-Install the required packages:
 
 pip install -r requirements.txt
 
-🔑 Gemini API Setup
+##🔑 Gemini API Setup
 
 Create a Gemini API key using Google AI Studio.
 
-Create:
+-Create:
 
 .streamlit/secrets.toml
 
-Add:
+-Add:
 
 GEMINI_API_KEY = "your-api-key-here"
-
-Make sure .gitignore contains:
-
-.streamlit/secrets.toml
 
 ▶️ Run the Application
 python -m streamlit run app.py
 
-🧩 How It Works
+##🧩 How It Works
 
-Paste study notes or upload a PDF.
-PyPDF extracts text from the PDF.
-Select question type, difficulty, and number of questions.
-The study material is sent to the Gemini API.
-Gemini generates quiz questions.
-Streamlit displays the quiz.
-Submit answers.
-The app calculates the score and percentage.
-Review correct and incorrect answers.
+-Paste study notes or upload a PDF.
+-PyPDF extracts text from the PDF.
+-Select question type, difficulty, and number of questions.
+-The study material is sent to the Gemini API.
+-Gemini generates quiz questions.
+-Streamlit displays the quiz.
+-Submit answers.
+-The app calculates the score and percentage.
+-Review correct and incorrect answers.
 
-🚀 Future Improvements
+##🚀 Future Improvements
 
-OCR support for scanned PDFs
-Timed quizzes
-Quiz history
-User accounts
-Performance analytics
-Export quiz results
-Support for DOCX and TXT files
-AI-generated answer explanations
+-OCR support for scanned PDFs
+-Timed quizzes
+-Quiz history
+-User accounts
+-Performance analytics
+-Export quiz results
+-Support for DOCX and TXT files
+-AI-generated answer explanations
 
-📸 Screenshots
+##📸 Screenshots
 
 Screenshots will be added after final testing and deployment.
