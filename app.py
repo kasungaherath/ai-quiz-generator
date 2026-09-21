@@ -1,46 +1,110 @@
 import streamlit as st
-from utils.pdf_reader import extract_text_from_pdf
 
+from utils.pdf_reader import extract_text_from_pdf
+from utils.quiz_generator import generate_quiz
+
+
+# -----------------------------
+# Page Configuration
+# -----------------------------
 st.set_page_config(
     page_title="AI Quiz Generator",
     page_icon="🧠",
     layout="centered"
 )
 
+
+# -----------------------------
+# App Title
+# -----------------------------
 st.title("🧠 AI Quiz Generator")
 
-st.write("Generate quizzes from study notes and PDF documents.")
+st.write(
+    "Generate quizzes from study notes or uploaded PDF documents."
+)
+
+
+# -----------------------------
+# API Key
+# -----------------------------
+api_key = st.secrets["GEMINI_API_KEY"]
+
+
+# -----------------------------
+# Study Material Input
+# -----------------------------
+study_text = ""
 
 input_method = st.radio(
     "Choose study material source:",
     ["Enter Text", "Upload PDF"]
 )
+
+
+# -----------------------------
+# Text Input
+# -----------------------------
 if input_method == "Enter Text":
+
     study_text = st.text_area(
         "Enter your study material:",
         height=300,
         placeholder="Paste your notes here..."
     )
 
+
+# -----------------------------
+# PDF Upload
+# -----------------------------
 else:
+
     uploaded_file = st.file_uploader(
         "Upload a PDF",
         type=["pdf"]
     )
 
     if uploaded_file is not None:
-        with st.spinner("Extracting text from PDF..."):
-            study_text = extract_text_from_pdf(uploaded_file)
 
-        if study_text:
-            st.success("PDF text extracted successfully!")
+        try:
 
-            with st.expander("Preview extracted text"):
-                st.write(study_text[:5000])
+            with st.spinner("Extracting text from PDF..."):
 
-        else:
-            st.warning("No readable text was found in this PDF.")
+                study_text = extract_text_from_pdf(
+                    uploaded_file
+                )
 
+            if study_text:
+
+                st.success(
+                    "PDF text extracted successfully!"
+                )
+
+                with st.expander(
+                    "Preview extracted text"
+                ):
+
+                    st.write(
+                        study_text[:5000]
+                    )
+
+            else:
+
+                st.warning(
+                    "No readable text was found in this PDF."
+                )
+
+        except Exception as error:
+
+            st.error(
+                "There was a problem reading the PDF."
+            )
+
+            st.exception(error)
+
+
+# -----------------------------
+# Quiz Settings
+# -----------------------------
 st.subheader("Quiz Settings")
 
 question_type = st.selectbox(
@@ -68,7 +132,67 @@ difficulty = st.selectbox(
     ]
 )
 
+
+# -----------------------------
+# Generate Quiz Button
+# -----------------------------
 generate_button = st.button(
     "Generate Quiz",
     type="primary"
 )
+
+
+# -----------------------------
+# Generate Quiz
+# -----------------------------
+if generate_button:
+
+    if not study_text.strip():
+
+        st.warning(
+            "Please provide study material first."
+        )
+
+    else:
+
+        try:
+
+            with st.spinner(
+                "Generating quiz..."
+            ):
+
+                quiz = generate_quiz(
+                    api_key=api_key,
+                    study_text=study_text,
+                    num_questions=num_questions,
+                    question_type=question_type,
+                    difficulty=difficulty
+                )
+
+                st.session_state.quiz = quiz
+
+            st.success(
+                "Quiz generated successfully!"
+            )
+
+        except Exception as error:
+
+            st.error(
+                "Quiz generation failed."
+            )
+
+            st.exception(error)
+
+
+# -----------------------------
+# Temporary Quiz Preview
+# -----------------------------
+if "quiz" in st.session_state:
+
+    st.subheader(
+        "Generated Quiz Preview"
+    )
+
+    st.write(
+        st.session_state.quiz
+    )
