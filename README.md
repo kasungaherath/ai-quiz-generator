@@ -58,73 +58,105 @@ ai-quiz-generator/
 │
 └── .streamlit/
     └── secrets.toml
+```
 
+> `.streamlit/secrets.toml` contains your API key and should not be uploaded to GitHub.
 
+---
 
-⚙️ Installation
+## ⚙️ Installation
 
 Clone the repository:
 
+```bash
 git clone https://github.com/YOUR_USERNAME/ai-quiz-generator.git
+```
 
 Move into the project folder:
 
+```bash
 cd ai-quiz-generator
+```
 
 Create a virtual environment:
 
+```bash
 python -m venv venv
+```
 
 Activate it on Windows:
 
+```bash
 venv\Scripts\activate
+```
 
 Install the required packages:
 
+```bash
 pip install -r requirements.txt
+```
 
-🔑 Gemini API Setup
+---
+
+## 🔑 Gemini API Setup
 
 Create a Gemini API key using Google AI Studio.
 
-Create:
+Create the following file:
 
+```text
 .streamlit/secrets.toml
+```
 
-Add:
+Add your API key:
 
+```toml
 GEMINI_API_KEY = "your-api-key-here"
+```
 
-Make sure .gitignore contains:
+Make sure `.gitignore` contains:
 
+```text
 .streamlit/secrets.toml
+```
 
-▶️ Run the Application
+---
+
+## ▶️ Run the Application
+
+```bash
 python -m streamlit run app.py
+```
 
-🧩 How It Works
+---
 
-Paste study notes or upload a PDF.
-PyPDF extracts text from the PDF.
-Select question type, difficulty, and number of questions.
-The study material is sent to the Gemini API.
-Gemini generates quiz questions.
-Streamlit displays the quiz.
-Submit answers.
-The app calculates the score and percentage.
-Review correct and incorrect answers.
+## 🧩 How It Works
 
-🚀 Future Improvements
+1. Paste study notes or upload a PDF.
+2. PyPDF extracts text from the PDF.
+3. Select question type, difficulty, and number of questions.
+4. The study material is sent to the Gemini API.
+5. Gemini generates quiz questions.
+6. Streamlit displays the quiz.
+7. Submit your answers.
+8. The app calculates the score and percentage.
+9. Review correct and incorrect answers.
 
-OCR support for scanned PDFs
-Timed quizzes
-Quiz history
-User accounts
-Performance analytics
-Export quiz results
-Support for DOCX and TXT files
-AI-generated answer explanations
+---
 
-📸 Screenshots
+## 🚀 Future Improvements
+
+- OCR support for scanned PDFs
+- Timed quizzes
+- Quiz history
+- User accounts
+- Performance analytics
+- Export quiz results
+- Support for DOCX and TXT files
+- AI-generated answer explanations
+
+---
+
+## 📸 Screenshots
 
 Screenshots will be added after final testing and deployment.
