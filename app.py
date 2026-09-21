@@ -1,4 +1,5 @@
 import streamlit as st
+from utils.pdf_reader import extract_text_from_pdf
 
 st.set_page_config(
     page_title="AI Quiz Generator",
@@ -26,3 +27,16 @@ else:
         "Upload a PDF",
         type=["pdf"]
     )
+
+    if uploaded_file is not None:
+        with st.spinner("Extracting text from PDF..."):
+            study_text = extract_text_from_pdf(uploaded_file)
+
+        if study_text:
+            st.success("PDF text extracted successfully!")
+
+            with st.expander("Preview extracted text"):
+                st.write(study_text[:5000])
+
+        else:
+            st.warning("No readable text was found in this PDF.")
