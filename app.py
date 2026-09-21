@@ -40,3 +40,35 @@ else:
 
         else:
             st.warning("No readable text was found in this PDF.")
+
+st.subheader("Quiz Settings")
+
+question_type = st.selectbox(
+    "Question type",
+    [
+        "Multiple Choice",
+        "True/False",
+        "Mixed"
+    ]
+)
+
+num_questions = st.slider(
+    "Number of questions",
+    min_value=5,
+    max_value=20,
+    value=10
+)
+
+difficulty = st.selectbox(
+    "Difficulty",
+    [
+        "Easy",
+        "Medium",
+        "Hard"
+    ]
+)
+
+generate_button = st.button(
+    "Generate Quiz",
+    type="primary"
+)
