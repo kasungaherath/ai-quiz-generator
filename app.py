@@ -1,3 +1,6 @@
+import base64
+from pathlib import Path
+
 import streamlit as st
 
 from utils.pdf_reader import extract_text_from_pdf
@@ -5,104 +8,548 @@ from utils.quiz_generator import generate_quiz
 from utils.quiz_utils import calculate_score
 
 
-# =========================================================
-# PAGE CONFIG
-# =========================================================
+BASE_DIR = Path(__file__).resolve().parent
+LOGO_PATH = BASE_DIR / "assets" / "quizora_logo.png"
+
 st.set_page_config(
     page_title="Quizora AI",
-    page_icon="🧠",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 
-# =========================================================
-# CUSTOM CSS
-# =========================================================
+def image_to_data_uri(path):
+    if not path.exists():
+        return None
+
+    encoded = base64.b64encode(
+        path.read_bytes()
+    ).decode("utf-8")
+
+    return f"data:image/png;base64,{encoded}"
+
+
+def reset_quiz_state():
+    removable = {
+        "quiz",
+        "quiz_submitted",
+        "results",
+        "score",
+        "quiz_config"
+    }
+
+    for key in list(st.session_state.keys()):
+        if key.startswith("question_") or key in removable:
+            del st.session_state[key]
+
+
+logo_uri = image_to_data_uri(LOGO_PATH)
+
+
 st.markdown(
     """
     <style>
 
+    @keyframes gradientMove {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes glowPulse {
+        0% {
+            opacity: 0.22;
+            transform: translateX(-50%) scale(0.95);
+        }
+        50% {
+            opacity: 0.48;
+            transform: translateX(-50%) scale(1.05);
+        }
+        100% {
+            opacity: 0.22;
+            transform: translateX(-50%) scale(0.95);
+        }
+    }
+
+    @keyframes buttonGlow {
+        0% {
+            box-shadow:
+                0 12px 30px rgba(99, 102, 241, 0.12),
+                0 0 0 rgba(56, 189, 248, 0);
+        }
+        50% {
+            box-shadow:
+                0 15px 38px rgba(124, 58, 237, 0.24),
+                0 0 25px rgba(56, 189, 248, 0.12);
+        }
+        100% {
+            box-shadow:
+                0 12px 30px rgba(99, 102, 241, 0.12),
+                0 0 0 rgba(56, 189, 248, 0);
+        }
+    }
+
     .stApp {
         background:
             radial-gradient(
-                circle at top left,
-                rgba(99, 102, 241, 0.12),
-                transparent 32%
+                circle at 8% 0%,
+                rgba(124, 58, 237, 0.09),
+                transparent 27%
             ),
             radial-gradient(
-                circle at top right,
-                rgba(16, 185, 129, 0.08),
-                transparent 28%
+                circle at 95% 10%,
+                rgba(14, 165, 233, 0.06),
+                transparent 25%
             ),
-            #0d1117;
+            radial-gradient(
+                circle at 45% 100%,
+                rgba(20, 184, 166, 0.035),
+                transparent 30%
+            ),
+            #080a0f;
+
+        background-size: 150% 150%;
+        animation: gradientMove 20s ease infinite;
     }
 
     .block-container {
-        max-width: 1150px;
-        padding-top: 2rem;
+        max-width: 1120px;
+        padding-top: 1.3rem;
         padding-bottom: 4rem;
     }
 
-    [data-testid="stSidebar"] {
-        background: #111827;
-        border-right: 1px solid rgba(255, 255, 255, 0.08);
+    #MainMenu {
+        visibility: hidden;
+    }
+
+    footer {
+        visibility: hidden;
+    }
+
+    header[data-testid="stHeader"] {
+        background: transparent;
+    }
+
+    h1 {
+        font-weight: 800 !important;
+        letter-spacing: -0.05em !important;
+        line-height: 1.08 !important;
+    }
+
+    h2 {
+        font-weight: 760 !important;
+        letter-spacing: -0.035em !important;
+    }
+
+    h3 {
+        font-weight: 700 !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    .quizora-brand {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        margin-bottom: 1.15rem;
+    }
+
+    .quizora-brand-logo {
+        width: 44px;
+        height: 44px;
+        object-fit: cover;
+        border-radius: 11px;
+        flex-shrink: 0;
+    }
+
+    .quizora-brand-name {
+        color: #f8fafc;
+        font-size: 1.7rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        line-height: 1.05;
+    }
+
+    .quizora-brand-tagline {
+        color: #747c8a;
+        font-size: 0.84rem;
+        margin-top: 5px;
+        line-height: 1.2;
+    }
+
+    .quizora-divider {
+        width: 100%;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.07);
+        margin-bottom: 3.4rem;
+    }
+
+    .hero-wrap {
+        position: relative;
+        isolation: isolate;
+        max-width: 900px;
+        margin: 0 auto 4rem auto;
+    }
+
+    .hero-wrap::before {
+        content: "";
+        position: absolute;
+        width: 650px;
+        height: 260px;
+        top: -100px;
+        left: 50%;
+
+        background:
+            radial-gradient(
+                circle,
+                rgba(124, 58, 237, 0.23),
+                rgba(59, 130, 246, 0.11),
+                rgba(45, 212, 191, 0.045),
+                transparent 70%
+            );
+
+        filter: blur(60px);
+        pointer-events: none;
+        z-index: -1;
+
+        animation: glowPulse 7s ease-in-out infinite;
+    }
+
+    .hero-title {
+        max-width: 850px;
+        margin-bottom: 1.3rem;
+
+        font-size: clamp(2.8rem, 5vw, 4.4rem);
+        font-weight: 800;
+        letter-spacing: -0.058em;
+        line-height: 1.04;
+
+        background:
+            linear-gradient(
+                90deg,
+                #ffffff,
+                #ddd6fe,
+                #a78bfa,
+                #818cf8,
+                #38bdf8,
+                #5eead4,
+                #ffffff
+            );
+
+        background-size: 300% 300%;
+
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        color: transparent;
+
+        animation: gradientMove 8s ease infinite;
+    }
+
+    .hero-copy {
+        max-width: 780px;
+        color: #a1a8b5;
+        font-size: 1.06rem;
+        line-height: 1.8;
+        margin-bottom: 1.25rem;
+    }
+
+    .hero-meta {
+        color: #69717f;
+        font-size: 0.86rem;
+        font-weight: 500;
+    }
+
+    .workspace-badge {
+        display: inline-block;
+        padding: 0.42rem 0.8rem;
+        margin-bottom: 0.9rem;
+
+        border-radius: 999px;
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(124, 58, 237, 0.16),
+                rgba(14, 165, 233, 0.10)
+            );
+
+        border:
+            1px solid rgba(129, 140, 248, 0.16);
+
+        color: #b8b9ff;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .workspace-title {
+        color: #f8fafc;
+        font-size: 2.75rem;
+        font-weight: 800;
+        letter-spacing: -0.05em;
+        line-height: 1.06;
+        margin-bottom: 0.55rem;
+    }
+
+    .workspace-copy {
+        max-width: 750px;
+        color: #8f97a6;
+        font-size: 1rem;
+        line-height: 1.75;
+        margin-bottom: 1.7rem;
+    }
+
+    .feature-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-pill {
+        padding: 0.48rem 0.8rem;
+        border-radius: 999px;
+
+        background:
+            rgba(255, 255, 255, 0.025);
+
+        border:
+            1px solid rgba(255, 255, 255, 0.07);
+
+        color: #989fad;
+        font-size: 0.8rem;
+    }
+
+    .sub-label {
+        color: #8b8ff8;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        margin-bottom: 0.4rem;
+    }
+
+    .sub-title {
+        color: #f1f5f9;
+        font-size: 1.25rem;
+        font-weight: 720;
+        letter-spacing: -0.025em;
+        margin-bottom: 0.3rem;
+    }
+
+    .sub-copy {
+        color: #828b9b;
+        line-height: 1.65;
+        margin-bottom: 1.1rem;
+    }
+
+    [data-testid="stVerticalBlockBorderWrapper"] {
+        position: relative;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(18, 21, 30, 0.88),
+                rgba(11, 14, 20, 0.92)
+            );
+
+        border:
+            1px solid rgba(255, 255, 255, 0.075)
+            !important;
+
+        border-radius: 20px !important;
+
+        box-shadow:
+            0 22px 65px rgba(0, 0, 0, 0.22);
+    }
+
+    textarea {
+        min-height: 280px !important;
+
+        background:
+            linear-gradient(
+                180deg,
+                #0c0f16,
+                #090c12
+            ) !important;
+
+        border-radius: 14px !important;
+
+        border-color:
+            rgba(255, 255, 255, 0.09)
+            !important;
+
+        line-height: 1.65 !important;
+    }
+
+    textarea:focus {
+        border-color:
+            rgba(124, 101, 255, 0.68)
+            !important;
+
+        box-shadow:
+            0 0 0 1px rgba(124, 101, 255, 0.20),
+            0 0 30px rgba(124, 58, 237, 0.07)
+            !important;
+    }
+
+    [data-baseweb="select"] > div {
+        min-height: 50px;
+        background: #0b0e14;
+        border-radius: 11px;
+    }
+
+    [data-testid="stFileUploaderDropzone"] {
+        min-height: 150px;
+
+        background:
+            linear-gradient(
+                180deg,
+                #0c0f16,
+                #090c12
+            );
+
+        border:
+            1px dashed rgba(129, 140, 248, 0.22);
+
+        border-radius: 15px;
+    }
+
+    .stRadio [role="radiogroup"] {
+        gap: 0.65rem;
+    }
+
+    .stRadio [role="radiogroup"] label {
+        padding: 0.55rem 0.85rem;
+
+        background:
+            rgba(255, 255, 255, 0.025);
+
+        border:
+            1px solid rgba(255, 255, 255, 0.07);
+
+        border-radius: 12px;
+    }
+
+    .stRadio [role="radiogroup"] label:hover {
+        background:
+            rgba(124, 58, 237, 0.06);
+
+        border-color:
+            rgba(124, 58, 237, 0.30);
     }
 
     [data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.035);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        padding: 1rem;
-        border-radius: 16px;
+        padding: 1rem 1.1rem;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.032),
+                rgba(255, 255, 255, 0.015)
+            );
+
+        border:
+            1px solid rgba(255, 255, 255, 0.07);
+
+        border-radius: 14px;
     }
 
     .stButton > button {
+        min-height: 50px;
         border-radius: 12px;
-        min-height: 48px;
         font-weight: 650;
+
         transition:
             transform 0.15s ease,
             box-shadow 0.15s ease;
     }
 
+    .stButton > button[kind="primary"] {
+        border: none;
+        color: white;
+
+        background:
+            linear-gradient(
+                100deg,
+                #7c3aed,
+                #6366f1,
+                #0ea5e9
+            );
+
+        background-size: 200% 200%;
+
+        animation:
+            gradientMove 7s ease infinite,
+            buttonGlow 4s ease-in-out infinite;
+    }
+
     .stButton > button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.20);
     }
 
-    textarea {
-        border-radius: 14px !important;
+    [data-testid="stProgress"] > div > div {
+        border-radius: 999px;
     }
 
-    [data-baseweb="select"] > div {
-        border-radius: 12px;
+    hr {
+        border-color: rgba(255, 255, 255, 0.07);
     }
 
-    .section-label {
-        font-size: 0.78rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: #818cf8;
-        font-weight: 700;
-        margin-bottom: 0.4rem;
+    @media (prefers-reduced-motion: reduce) {
+        .stApp,
+        .hero-title,
+        .hero-wrap::before,
+        .stButton > button[kind="primary"] {
+            animation: none !important;
+        }
     }
 
-    .section-title {
-        font-size: 1.6rem;
-        font-weight: 750;
-        margin-bottom: 0.3rem;
-    }
+    @media (max-width: 700px) {
+        .block-container {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
 
-    .section-description {
-        color: #9ca3af;
-        margin-bottom: 1.4rem;
-    }
+        .quizora-brand-logo {
+            width: 39px;
+            height: 39px;
+        }
 
-    .footer {
-        text-align: center;
-        color: #6b7280;
-        font-size: 0.82rem;
-        padding-top: 2rem;
+        .quizora-brand-name {
+            font-size: 1.45rem;
+        }
+
+        .quizora-brand-tagline {
+            font-size: 0.76rem;
+        }
+
+        .quizora-divider {
+            margin-bottom: 2.5rem;
+        }
+
+        .hero-title {
+            font-size: 2.65rem;
+        }
+
+        .hero-wrap {
+            margin-bottom: 3rem;
+        }
+
+        .hero-wrap::before {
+            width: 330px;
+        }
+
+        .workspace-title {
+            font-size: 2.2rem;
+        }
     }
 
     </style>
@@ -111,354 +558,319 @@ st.markdown(
 )
 
 
-# =========================================================
-# RESET FUNCTION
-# =========================================================
-def reset_quiz_state():
-
-    keys_to_remove = [
-        key
-        for key in st.session_state.keys()
-        if key.startswith("question_")
-    ]
-
-    keys_to_remove += [
-        "quiz",
-        "quiz_submitted",
-        "results",
-        "score"
-    ]
-
-    for key in keys_to_remove:
-        if key in st.session_state:
-            del st.session_state[key]
-
-
-# =========================================================
-# API KEY
-# =========================================================
 try:
     api_key = st.secrets["GEMINI_API_KEY"]
 
 except KeyError:
-
     st.error(
         "Gemini API key was not found. "
-        "Add GEMINI_API_KEY to .streamlit/secrets.toml"
+        "Add GEMINI_API_KEY to .streamlit/secrets.toml."
     )
-
     st.stop()
 
 
-# =========================================================
-# SIDEBAR
-# =========================================================
-with st.sidebar:
-
-    st.markdown("## 🧠 Quizora AI")
-
-    st.caption(
-        "Learn smarter with AI"
+if logo_uri:
+    brand_html = (
+        '<div class="quizora-brand">'
+        f'<img src="{logo_uri}" class="quizora-brand-logo">'
+        '<div>'
+        '<div class="quizora-brand-name">Quizora AI</div>'
+        '<div class="quizora-brand-tagline">'
+        'AI-powered study quiz generator'
+        '</div>'
+        '</div>'
+        '</div>'
+        '<div class="quizora-divider"></div>'
+    )
+else:
+    brand_html = (
+        '<div class="quizora-brand">'
+        '<div>'
+        '<div class="quizora-brand-name">Quizora AI</div>'
+        '<div class="quizora-brand-tagline">'
+        'AI-powered study quiz generator'
+        '</div>'
+        '</div>'
+        '</div>'
+        '<div class="quizora-divider"></div>'
     )
 
-    st.divider()
+st.markdown(
+    brand_html,
+    unsafe_allow_html=True
+)
 
-    st.markdown("### Quiz Configuration")
 
-    question_type = st.selectbox(
-        "Question Type",
+st.markdown(
+    (
+        '<div class="hero-wrap">'
+        '<div class="hero-title">'
+        'Turn your study material into smarter quizzes.'
+        '</div>'
+        '<div class="hero-copy">'
+        'Upload a PDF or paste your notes to generate focused '
+        'AI-powered quizzes. Customize the difficulty and question '
+        'format, test your knowledge, and receive instant scoring '
+        'with a complete answer review.'
+        '</div>'
+        '<div class="hero-meta">'
+        'PDF and text input &nbsp;&nbsp;|&nbsp;&nbsp; '
+        'Multiple quiz formats &nbsp;&nbsp;|&nbsp;&nbsp; '
+        'Instant scoring'
+        '</div>'
+        '</div>'
+    ),
+    unsafe_allow_html=True
+)
+
+
+st.markdown(
+    '<div class="workspace-badge">Quiz workspace</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    '<div class="workspace-title">Create a quiz</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    (
+        '<div class="workspace-copy">'
+        'Transform your study material into a focused assessment. '
+        'Choose your content source, customize the experience, '
+        'and generate questions designed around your material.'
+        '</div>'
+    ),
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    (
+        '<div class="feature-row">'
+        '<span class="feature-pill">Text and PDF input</span>'
+        '<span class="feature-pill">MCQ and True/False</span>'
+        '<span class="feature-pill">Difficulty control</span>'
+        '<span class="feature-pill">Instant evaluation</span>'
+        '</div>'
+    ),
+    unsafe_allow_html=True
+)
+
+
+with st.container(border=True):
+
+    st.markdown(
+        '<div class="sub-label">Source</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="sub-title">Add study material</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        (
+            '<div class="sub-copy">'
+            'Paste your notes directly or upload a text-based PDF.'
+            '</div>'
+        ),
+        unsafe_allow_html=True
+    )
+
+
+    source_mode = st.radio(
+        "Choose an input method",
         [
-            "Multiple Choice",
-            "True/False",
-            "Mixed"
-        ]
-    )
-
-    difficulty = st.selectbox(
-        "Difficulty",
-        [
-            "Easy",
-            "Medium",
-            "Hard"
-        ]
-    )
-
-    num_questions = st.slider(
-        "Number of Questions",
-        min_value=5,
-        max_value=20,
-        value=10
-    )
-
-    st.divider()
-
-    st.markdown("### Current Setup")
-
-    st.caption(
-        f"Type: {question_type}"
-    )
-
-    st.caption(
-        f"Difficulty: {difficulty}"
-    )
-
-    st.caption(
-        f"Questions: {num_questions}"
-    )
-
-    st.divider()
-
-    if "quiz" in st.session_state:
-
-        if st.button(
-            "Start New Quiz",
-            use_container_width=True
-        ):
-
-            reset_quiz_state()
-
-            st.rerun()
-
-
-# =========================================================
-# APP HEADER
-# =========================================================
-st.markdown(
-    """
-    <h1 style="
-        font-size: 3.2rem;
-        font-weight: 800;
-        margin-bottom: 0;
-    ">
-        🧠 Quizora AI
-    </h1>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
-    <h3 style="
-        margin-top: 0.3rem;
-        font-weight: 500;
-        color: #a5b4fc;
-    ">
-        AI-Powered Quiz Generator for Smarter Learning
-    </h3>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    """
-    <p style="
-        font-size: 1.08rem;
-        line-height: 1.8;
-        max-width: 900px;
-        color: #9ca3af;
-        margin-top: 1rem;
-        margin-bottom: 1.8rem;
-    ">
-        Transform your study materials into interactive quizzes in seconds.
-        Paste your notes or upload a PDF, choose your preferred difficulty
-        and question format, and let AI generate a personalized quiz.
-        Test your knowledge, receive instant scoring, and review your answers
-        to improve your understanding.
-    </p>
-    """,
-    unsafe_allow_html=True
-)
-
-feature1, feature2, feature3 = st.columns(3)
-
-with feature1:
-
-    st.markdown("### 📄 Upload")
-
-    st.caption(
-        "Use your own PDF documents or paste study notes."
-    )
-
-with feature2:
-
-    st.markdown("### ✨ Generate")
-
-    st.caption(
-        "Create AI-powered MCQ and True/False questions."
-    )
-
-with feature3:
-
-    st.markdown("### 📊 Learn")
-
-    st.caption(
-        "Get instant scores and review your answers."
+            "Paste text",
+            "Upload PDF"
+        ],
+        horizontal=True,
+        label_visibility="collapsed"
     )
 
 
-st.divider()
+    study_text = ""
+    source_name = ""
 
 
-# =========================================================
-# STUDY MATERIAL
-# =========================================================
-st.markdown(
-    """
-    <div class="section-label">
-        Step 01
-    </div>
+    if source_mode == "Paste text":
 
-    <div class="section-title">
-        Add your study material
-    </div>
-
-    <div class="section-description">
-        Paste your notes directly or upload a PDF document.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-
-source_tab1, source_tab2 = st.tabs(
-    [
-        "Paste Text",
-        "Upload PDF"
-    ]
-)
-
-
-study_text = ""
-
-
-# =========================================================
-# TEXT INPUT
-# =========================================================
-with source_tab1:
-
-    typed_text = st.text_area(
-        "Study Material",
-        height=280,
-        placeholder=(
-            "Paste your lecture notes, revision material, "
-            "or textbook content here..."
+        study_text = st.text_area(
+            "Study material",
+            height=280,
+            placeholder=(
+                "Paste lecture notes, textbook content, "
+                "revision material, or other study text..."
+            )
         )
-    )
+
+        source_name = "Pasted text"
 
 
-# =========================================================
-# PDF INPUT
-# =========================================================
-with source_tab2:
+    else:
 
-    uploaded_file = st.file_uploader(
-        "Upload PDF",
-        type=["pdf"],
-        help="Upload a text-based PDF document."
-    )
+        uploaded_file = st.file_uploader(
+            "Upload PDF",
+            type=["pdf"],
+            help="Text-based PDF documents work best."
+        )
 
-    pdf_text = ""
 
-    if uploaded_file is not None:
+        if uploaded_file is not None:
 
-        try:
+            try:
 
-            with st.spinner(
-                "Reading your PDF..."
-            ):
+                with st.spinner(
+                    "Reading document..."
+                ):
 
-                pdf_text = extract_text_from_pdf(
-                    uploaded_file
-                )
+                    study_text = extract_text_from_pdf(
+                        uploaded_file
+                    )
 
-            if pdf_text:
+                source_name = uploaded_file.name
 
-                st.success(
-                    "PDF processed successfully."
+
+                if study_text:
+
+                    st.success(
+                        "Document processed successfully."
+                    )
+
+                    with st.expander(
+                        "Preview extracted text"
+                    ):
+                        st.write(
+                            study_text[:4000]
+                        )
+
+
+                else:
+
+                    st.warning(
+                        "No readable text was found in this PDF."
+                    )
+
+
+            except Exception as error:
+
+                st.error(
+                    "The PDF could not be processed."
                 )
 
                 with st.expander(
-                    "Preview extracted content"
+                    "Technical details"
                 ):
-
-                    st.write(
-                        pdf_text[:5000]
-                    )
-
-            else:
-
-                st.warning(
-                    "No readable text was found "
-                    "inside this PDF."
-                )
-
-        except Exception as error:
-
-            st.error(
-                "The PDF could not be processed."
-            )
-
-            with st.expander(
-                "Technical details"
-            ):
-
-                st.exception(error)
+                    st.exception(error)
 
 
-# =========================================================
-# CHOOSE ACTIVE INPUT
-# =========================================================
-if typed_text.strip():
+    if study_text.strip():
 
-    study_text = typed_text
+        word_count = len(
+            study_text.split()
+        )
 
-elif pdf_text.strip():
-
-    study_text = pdf_text
-
-
-# =========================================================
-# GENERATE QUIZ SECTION
-# =========================================================
-st.write("")
-
-st.markdown(
-    """
-    <div class="section-label">
-        Step 02
-    </div>
-
-    <div class="section-title">
-        Generate your quiz
-    </div>
-
-    <div class="section-description">
-        Configure the quiz using the sidebar,
-        then generate questions from your material.
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        st.caption(
+            f"{source_name} | {word_count:,} words"
+        )
 
 
-generate_button = st.button(
-    "✨ Generate AI Quiz",
-    type="primary",
-    use_container_width=True
-)
+    st.divider()
 
 
-# =========================================================
-# GENERATE QUIZ
-# =========================================================
+    st.markdown(
+        '<div class="sub-label">Configuration</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="sub-title">Customize your quiz</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        (
+            '<div class="sub-copy">'
+            'Choose the question format, difficulty, and quiz length.'
+            '</div>'
+        ),
+        unsafe_allow_html=True
+    )
+
+
+    col1, col2, col3 = st.columns(3)
+
+
+    with col1:
+        question_type = st.selectbox(
+            "Question type",
+            [
+                "Multiple Choice",
+                "True/False",
+                "Mixed"
+            ]
+        )
+
+
+    with col2:
+        difficulty = st.selectbox(
+            "Difficulty",
+            [
+                "Easy",
+                "Medium",
+                "Hard"
+            ]
+        )
+
+
+    with col3:
+        num_questions = st.selectbox(
+            "Number of questions",
+            [
+                5,
+                10,
+                15,
+                20
+            ],
+            index=1
+        )
+
+
+    MAX_CHARACTERS = 30000
+
+    prepared_text = study_text[
+        :MAX_CHARACTERS
+    ]
+
+
+    if len(study_text) > MAX_CHARACTERS:
+
+        st.info(
+            "This document is large. "
+            "The first 30,000 characters will be used."
+        )
+
+
+    st.write("")
+
+
+    generate_button = st.button(
+        "Generate quiz",
+        type="primary",
+        use_container_width=True
+    )
+
+
 if generate_button:
 
-    if not study_text.strip():
+    if not prepared_text.strip():
 
         st.warning(
-            "Please add study material "
-            "before generating a quiz."
+            "Add study material before generating a quiz."
         )
+
 
     else:
 
@@ -466,23 +878,33 @@ if generate_button:
 
             reset_quiz_state()
 
+
             with st.spinner(
-                "Building your quiz..."
+                "Generating questions..."
             ):
 
                 quiz = generate_quiz(
                     api_key=api_key,
-                    study_text=study_text,
+                    study_text=prepared_text,
                     num_questions=num_questions,
                     question_type=question_type,
                     difficulty=difficulty
                 )
 
-                st.session_state.quiz = quiz
+
+            st.session_state.quiz = quiz
+
+            st.session_state.quiz_config = {
+                "question_type": question_type,
+                "difficulty": difficulty,
+                "num_questions": len(quiz)
+            }
+
 
             st.success(
-                "Your quiz is ready."
+                "Quiz generated successfully."
             )
+
 
         except Exception as error:
 
@@ -494,59 +916,77 @@ if generate_button:
             with st.expander(
                 "Technical details"
             ):
-
                 st.exception(error)
 
 
-# =========================================================
-# QUIZ
-# =========================================================
-if "quiz" in st.session_state:
+if (
+    "quiz" in st.session_state
+    and not st.session_state.get(
+        "quiz_submitted",
+        False
+    )
+):
 
     quiz = st.session_state.quiz
 
+    quiz_config = st.session_state.get(
+        "quiz_config",
+        {}
+    )
+
+
+    st.write("")
     st.write("")
 
+
     st.markdown(
-        """
-        <div class="section-label">
-            Step 03
-        </div>
+        '<div class="workspace-badge">Active quiz</div>',
+        unsafe_allow_html=True
+    )
 
-        <div class="section-title">
-            Complete your quiz
-        </div>
+    st.markdown(
+        '<div class="workspace-title">Test what you know</div>',
+        unsafe_allow_html=True
+    )
 
-        <div class="section-description">
-            Answer every question and submit
-            when you are ready.
-        </div>
-        """,
+    st.markdown(
+        (
+            '<div class="workspace-copy">'
+            'Answer each question and submit when you are ready. '
+            'Your score and answer review will appear immediately.'
+            '</div>'
+        ),
         unsafe_allow_html=True
     )
 
 
-    info_col1, info_col2, info_col3 = st.columns(3)
+    info1, info2, info3 = st.columns(3)
 
-    with info_col1:
 
+    with info1:
         st.metric(
             "Questions",
             len(quiz)
         )
 
-    with info_col2:
 
+    with info2:
         st.metric(
             "Difficulty",
-            difficulty
+            quiz_config.get(
+                "difficulty",
+                difficulty
+            )
         )
 
-    with info_col3:
 
+    with info3:
         st.metric(
             "Format",
-            question_type
+            quiz_config.get(
+                "question_type",
+                question_type
+            )
         )
 
 
@@ -555,10 +995,9 @@ if "quiz" in st.session_state:
     user_answers = {}
 
 
-    # =====================================================
-    # QUESTIONS
-    # =====================================================
-    for index, question in enumerate(quiz):
+    for index, question in enumerate(
+        quiz
+    ):
 
         with st.container(
             border=True
@@ -573,46 +1012,44 @@ if "quiz" in st.session_state:
             )
 
             selected_answer = st.radio(
-                "Select an answer",
+                "Choose an answer",
                 question["options"],
                 key=f"question_{index}",
                 index=None,
                 label_visibility="collapsed"
             )
 
-            user_answers[index] = (
-                selected_answer
-            )
+            user_answers[
+                index
+            ] = selected_answer
 
 
-    # =====================================================
-    # PROGRESS
-    # =====================================================
     answered_count = sum(
         answer is not None
         for answer in user_answers.values()
     )
 
-    progress_value = (
-        answered_count / len(quiz)
+
+    completion = (
+        answered_count
+        / len(quiz)
     )
+
 
     st.write("")
 
     st.caption(
-        f"{answered_count} of {len(quiz)} questions answered"
+        f"{answered_count} of "
+        f"{len(quiz)} questions answered"
     )
 
     st.progress(
-        progress_value
+        completion
     )
 
 
-    # =====================================================
-    # SUBMIT QUIZ
-    # =====================================================
     submit_button = st.button(
-        "✅ Submit Quiz",
+        "Submit quiz",
         type="primary",
         use_container_width=True
     )
@@ -622,14 +1059,16 @@ if "quiz" in st.session_state:
 
         unanswered = [
             index + 1
-            for index, answer in user_answers.items()
+            for index, answer
+            in user_answers.items()
             if answer is None
         ]
+
 
         if unanswered:
 
             st.warning(
-                "Complete all questions before submitting."
+                "Answer all questions before submitting."
             )
 
             st.caption(
@@ -642,6 +1081,7 @@ if "quiz" in st.session_state:
                 )
             )
 
+
         else:
 
             score, results = calculate_score(
@@ -649,164 +1089,160 @@ if "quiz" in st.session_state:
                 user_answers
             )
 
-            st.session_state.quiz_submitted = True
-            st.session_state.results = results
             st.session_state.score = score
+            st.session_state.results = results
+            st.session_state.quiz_submitted = True
 
             st.rerun()
 
 
-# =========================================================
-# RESULTS
-# =========================================================
-if (
-    "quiz_submitted" in st.session_state
-    and st.session_state.quiz_submitted
+if st.session_state.get(
+    "quiz_submitted",
+    False
 ):
-
-    st.write("")
-
-    st.markdown(
-        """
-        <div class="section-label">
-            Performance
-        </div>
-
-        <div class="section-title">
-            Your quiz results
-        </div>
-
-        <div class="section-description">
-            Review your score and check
-            every answer below.
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
 
     score = st.session_state.score
     results = st.session_state.results
+    quiz = st.session_state.quiz
 
-    total = len(
-        st.session_state.quiz
-    )
+    total = len(quiz)
 
     percentage = (
         score / total
     ) * 100
 
 
-    # =====================================================
-    # SCORE CARDS
-    # =====================================================
-    result_col1, result_col2, result_col3 = st.columns(3)
-
-    with result_col1:
-
-        st.metric(
-            "Score",
-            f"{score}/{total}"
-        )
-
-    with result_col2:
-
-        st.metric(
-            "Accuracy",
-            f"{percentage:.1f}%"
-        )
-
-    with result_col3:
-
-        incorrect = total - score
-
-        st.metric(
-            "Incorrect",
-            incorrect
-        )
-
-
+    st.write("")
     st.write("")
 
-    st.progress(
-        percentage / 100
+
+    st.markdown(
+        '<div class="workspace-badge">Performance</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        '<div class="workspace-title">Quiz results</div>',
+        unsafe_allow_html=True
     )
 
 
     if percentage >= 80:
 
         st.success(
-            "Excellent performance. "
-            "You have a strong understanding "
+            "Strong performance. "
+            "You demonstrated a good understanding "
             "of this material."
         )
+
 
     elif percentage >= 60:
 
         st.info(
-            "Good performance. "
-            "Review the missed questions "
-            "and try again."
+            "Good progress. Review the questions "
+            "you missed and try another quiz."
         )
+
 
     else:
 
         st.warning(
-            "More revision would help. "
-            "Review the answers below "
-            "and generate another quiz."
+            "More revision is recommended. "
+            "Review the answers below before trying again."
         )
 
 
-    # =====================================================
-    # ANSWER REVIEW
-    # =====================================================
-    st.write("")
+    result1, result2, result3 = st.columns(3)
 
-    st.markdown(
-        "## 🔍 Answer Review"
+
+    with result1:
+        st.metric(
+            "Score",
+            f"{score}/{total}"
+        )
+
+
+    with result2:
+        st.metric(
+            "Accuracy",
+            f"{percentage:.0f}%"
+        )
+
+
+    with result3:
+        st.metric(
+            "Incorrect",
+            total - score
+        )
+
+
+    st.progress(
+        percentage / 100
     )
 
 
-    for index, result in enumerate(results):
+    st.write("")
+    st.write("")
 
-        with st.container(
-            border=True
+
+    st.markdown(
+        '<div class="sub-title">Answer review</div>',
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        (
+            '<div class="sub-copy">'
+            'Review incorrect responses and reinforce '
+            'the correct information.'
+            '</div>'
+        ),
+        unsafe_allow_html=True
+    )
+
+
+    for index, result in enumerate(
+        results
+    ):
+
+        status = (
+            "Correct"
+            if result["is_correct"]
+            else "Needs review"
+        )
+
+
+        with st.expander(
+            f"{index + 1}. "
+            f"{result['question']} "
+            f"- {status}"
         ):
-
-            st.caption(
-                f"QUESTION {index + 1}"
-            )
-
-            st.markdown(
-                f"### {result['question']}"
-            )
-
 
             if result["is_correct"]:
 
                 st.success(
-                    "Correct"
+                    "Your answer was correct."
                 )
 
                 st.write(
-                    f"**Answer:** "
+                    "**Answer:** "
                     f"{result['correct_answer']}"
                 )
+
 
             else:
 
                 st.error(
-                    "Incorrect"
+                    "Your answer was incorrect."
                 )
 
                 st.write(
-                    f"**Your answer:** "
+                    "**Your answer:** "
                     f"{result['user_answer']}"
                 )
 
                 st.write(
-                    f"**Correct answer:** "
+                    "**Correct answer:** "
                     f"{result['correct_answer']}"
                 )
 
@@ -815,7 +1251,8 @@ if (
 
 
     if st.button(
-        "🔄 Create Another Quiz",
+        "Create another quiz",
+        type="primary",
         use_container_width=True
     ):
 
@@ -824,15 +1261,10 @@ if (
         st.rerun()
 
 
-# =========================================================
-# FOOTER
-# =========================================================
-st.markdown(
-    """
-    <div class="footer">
-        Quizora AI · Built with Python,
-        Streamlit and Generative AI
-    </div>
-    """,
-    unsafe_allow_html=True
+st.write("")
+st.write("")
+st.divider()
+
+st.caption(
+    "Quizora AI | AI-powered study quiz generator"
 )
