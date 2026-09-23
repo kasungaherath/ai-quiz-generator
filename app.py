@@ -101,6 +101,10 @@ st.markdown(
         }
     }
 
+    html {
+        scroll-behavior: smooth;
+    }
+
     .stApp {
         background:
             radial-gradient(
@@ -321,35 +325,9 @@ st.markdown(
         margin-bottom: 1.7rem;
     }
 
-    .feature-row {
-        display: flex;
-        flex-wrap: wrap;
-
-        gap: 0.65rem;
-
-        margin-bottom: 1.5rem;
-    }
-
-    .feature-pill {
-        padding: 0.48rem 0.8rem;
-
-        border-radius: 999px;
-
-        background:
-            rgba(255, 255, 255, 0.025);
-
-        border:
-            1px solid rgba(255, 255, 255, 0.07);
-
-        color: #989fad;
-
-        font-size: 0.8rem;
-    }
-
     .builder-header {
         position: relative;
         z-index: 1;
-
         margin-bottom: 1.35rem;
     }
 
@@ -402,8 +380,7 @@ st.markdown(
     .builder-divider {
         height: 1px;
 
-        margin:
-            1.8rem 0;
+        margin: 1.8rem 0;
 
         background:
             linear-gradient(
@@ -456,7 +433,6 @@ st.markdown(
 
     .configuration-value {
         color: #f1f5f9;
-
         font-size: 1rem;
         font-weight: 650;
     }
@@ -471,8 +447,7 @@ st.markdown(
 
         margin-top: 0.8rem;
 
-        padding:
-            0.7rem 0.85rem;
+        padding: 0.7rem 0.85rem;
 
         border-radius: 11px;
 
@@ -485,6 +460,99 @@ st.markdown(
         color: #818998;
 
         font-size: 0.79rem;
+    }
+
+    .quiz-ready-panel {
+        margin-top: 1rem;
+
+        padding: 1rem 1.1rem;
+
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        gap: 1rem;
+
+        border-radius: 15px;
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(34, 197, 94, 0.08),
+                rgba(99, 102, 241, 0.07)
+            );
+
+        border:
+            1px solid rgba(74, 222, 128, 0.14);
+    }
+
+    .quiz-ready-title {
+        color: #f8fafc;
+
+        font-size: 0.95rem;
+        font-weight: 700;
+
+        margin-bottom: 0.2rem;
+    }
+
+    .quiz-ready-text {
+        color: #818a99;
+
+        font-size: 0.8rem;
+    }
+
+    .go-to-quiz-button {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        min-width: 140px;
+
+        padding: 0.72rem 1.15rem;
+
+        border-radius: 11px;
+
+        text-decoration: none !important;
+
+        color: #ffffff !important;
+
+        font-size: 0.86rem;
+        font-weight: 700;
+
+        background:
+            linear-gradient(
+                100deg,
+                #7c3aed,
+                #6366f1,
+                #0ea5e9
+            );
+
+        background-size: 200% 200%;
+
+        animation: gradientMove 7s ease infinite;
+
+        box-shadow:
+            0 10px 28px rgba(99, 102, 241, 0.18);
+
+        transition:
+            transform 0.15s ease,
+            box-shadow 0.15s ease;
+    }
+
+    .go-to-quiz-button:hover {
+        transform: translateY(-1px);
+
+        box-shadow:
+            0 14px 34px rgba(99, 102, 241, 0.28);
+
+        color: #ffffff !important;
+
+        text-decoration: none !important;
+    }
+
+    .quiz-anchor {
+        scroll-margin-top: 80px;
     }
 
     .sub-label {
@@ -570,6 +638,7 @@ st.markdown(
     .analytics-top,
     .results-top {
         position: relative;
+
         z-index: 1;
 
         display: flex;
@@ -610,6 +679,7 @@ st.markdown(
     .analytics-chip-row,
     .results-chip-row {
         display: flex;
+
         flex-wrap: wrap;
 
         gap: 0.55rem;
@@ -617,8 +687,7 @@ st.markdown(
 
     .analytics-chip,
     .results-chip {
-        padding:
-            0.48rem 0.75rem;
+        padding: 0.48rem 0.75rem;
 
         border-radius: 999px;
 
@@ -637,6 +706,7 @@ st.markdown(
     .analytics-grid,
     .results-grid {
         position: relative;
+
         z-index: 1;
 
         display: grid;
@@ -687,6 +757,7 @@ st.markdown(
         font-weight: 760;
 
         letter-spacing: -0.045em;
+
         line-height: 1.05;
 
         margin-bottom: 0.45rem;
@@ -744,6 +815,7 @@ st.markdown(
 
     .results-status {
         position: relative;
+
         z-index: 1;
 
         margin-bottom: 1rem;
@@ -949,7 +1021,8 @@ st.markdown(
         .hero-wrap::before,
         .analytics-gradient-value,
         .results-gradient-value,
-        .stButton > button[kind="primary"] {
+        .stButton > button[kind="primary"],
+        .go-to-quiz-button {
             animation: none !important;
         }
     }
@@ -1008,6 +1081,15 @@ st.markdown(
         .configuration-grid {
             grid-template-columns: 1fr;
         }
+
+        .quiz-ready-panel {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .go-to-quiz-button {
+            width: 100%;
+        }
     }
 
     @media (max-width: 560px) {
@@ -1025,9 +1107,11 @@ st.markdown(
 
 
 try:
+
     api_key = st.secrets["GEMINI_API_KEY"]
 
 except KeyError:
+
     st.error(
         "Gemini API key was not found. "
         "Add GEMINI_API_KEY to .streamlit/secrets.toml."
@@ -1114,7 +1198,9 @@ st.markdown(
 )
 
 
-with st.container(border=True):
+with st.container(
+    border=True
+):
 
     st.markdown(
         '<div class="builder-header">'
@@ -1217,7 +1303,9 @@ with st.container(border=True):
                     "Technical details"
                 ):
 
-                    st.exception(error)
+                    st.exception(
+                        error
+                    )
 
 
     if study_text.strip():
@@ -1228,10 +1316,12 @@ with st.container(border=True):
 
 
         st.markdown(
-            '<div class="input-status">'
-            f'<span>{source_name}</span>'
-            f'<span>{word_count:,} words</span>'
-            '</div>',
+            (
+                '<div class="input-status">'
+                f'<span>{source_name}</span>'
+                f'<span>{word_count:,} words</span>'
+                '</div>'
+            ),
             unsafe_allow_html=True
         )
 
@@ -1306,36 +1396,38 @@ with st.container(border=True):
 
 
     st.markdown(
-        '<div class="configuration-grid">'
+        (
+            '<div class="configuration-grid">'
 
-        '<div class="configuration-card">'
-        '<div class="configuration-label">'
-        'Format'
-        '</div>'
-        f'<div class="configuration-value">'
-        f'{question_type}'
-        '</div>'
-        '</div>'
+            '<div class="configuration-card">'
+            '<div class="configuration-label">'
+            'Format'
+            '</div>'
+            f'<div class="configuration-value">'
+            f'{question_type}'
+            '</div>'
+            '</div>'
 
-        '<div class="configuration-card">'
-        '<div class="configuration-label">'
-        'Difficulty'
-        '</div>'
-        f'<div class="configuration-value">'
-        f'{difficulty}'
-        '</div>'
-        '</div>'
+            '<div class="configuration-card">'
+            '<div class="configuration-label">'
+            'Difficulty'
+            '</div>'
+            f'<div class="configuration-value">'
+            f'{difficulty}'
+            '</div>'
+            '</div>'
 
-        '<div class="configuration-card">'
-        '<div class="configuration-label">'
-        'Quiz Length'
-        '</div>'
-        f'<div class="configuration-value">'
-        f'{num_questions} questions'
-        '</div>'
-        '</div>'
+            '<div class="configuration-card">'
+            '<div class="configuration-label">'
+            'Quiz Length'
+            '</div>'
+            f'<div class="configuration-value">'
+            f'{num_questions} questions'
+            '</div>'
+            '</div>'
 
-        '</div>',
+            '</div>'
+        ),
         unsafe_allow_html=True
     )
 
@@ -1403,8 +1495,30 @@ if generate_button:
             }
 
 
-            st.success(
-                "Quiz generated successfully."
+            st.markdown(
+                (
+                    '<div class="quiz-ready-panel">'
+
+                    '<div>'
+
+                    '<div class="quiz-ready-title">'
+                    'Quiz generated successfully'
+                    '</div>'
+
+                    '<div class="quiz-ready-text">'
+                    f'{len(quiz)} questions are ready to answer.'
+                    '</div>'
+
+                    '</div>'
+
+                    '<a class="go-to-quiz-button" '
+                    'href="#quiz-dashboard">'
+                    'Go to quiz'
+                    '</a>'
+
+                    '</div>'
+                ),
+                unsafe_allow_html=True
             )
 
 
@@ -1420,7 +1534,9 @@ if generate_button:
                 "Technical details"
             ):
 
-                st.exception(error)
+                st.exception(
+                    error
+                )
 
 
 if (
@@ -1432,6 +1548,7 @@ if (
 ):
 
     quiz = st.session_state.quiz
+
 
     quiz_config = st.session_state.get(
         "quiz_config",
@@ -1469,6 +1586,13 @@ if (
     )
 
 
+    st.markdown(
+        '<div id="quiz-dashboard" '
+        'class="quiz-anchor"></div>',
+        unsafe_allow_html=True
+    )
+
+
     st.write("")
     st.write("")
 
@@ -1496,15 +1620,19 @@ if (
         '</div>'
 
         '<div class="analytics-chip-row">'
+
         '<span class="analytics-chip">'
         'Live progress'
         '</span>'
+
         '<span class="analytics-chip">'
         'Instant scoring'
         '</span>'
+
         '<span class="analytics-chip">'
         'Answer review'
         '</span>'
+
         '</div>'
 
         '</div>'
@@ -1580,8 +1708,7 @@ if (
 
 
     st.progress(
-        answered_count
-        / len(quiz)
+        answered_count / len(quiz)
     )
 
 
@@ -1688,11 +1815,14 @@ if st.session_state.get(
     quiz = st.session_state.quiz
 
 
-    total = len(quiz)
+    total = len(
+        quiz
+    )
 
     correct = score
 
     incorrect = total - score
+
 
     percentage = (
         score
@@ -1854,8 +1984,7 @@ if st.session_state.get(
 
 
     st.progress(
-        percentage
-        / 100
+        percentage / 100
     )
 
 
