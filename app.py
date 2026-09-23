@@ -1,4 +1,5 @@
 import base64
+from io import BytesIO
 from pathlib import Path
 
 import streamlit as st
@@ -10,6 +11,7 @@ from utils.quiz_utils import calculate_score
 
 BASE_DIR = Path(__file__).resolve().parent
 LOGO_PATH = BASE_DIR / "assets" / "quizora_logo.png"
+MAX_CHARACTERS = 30000
 
 st.set_page_config(
     page_title="Quizora AI",
@@ -22,11 +24,13 @@ def image_to_data_uri(path):
     if not path.exists():
         return None
 
-    encoded = base64.b64encode(
-        path.read_bytes()
-    ).decode("utf-8")
-
+    encoded = base64.b64encode(path.read_bytes()).decode("utf-8")
     return f"data:image/png;base64,{encoded}"
+
+
+@st.cache_data(show_spinner=False)
+def extract_pdf_text_cached(file_bytes):
+    return extract_text_from_pdf(BytesIO(file_bytes))
 
 
 def reset_quiz_state():
@@ -41,6 +45,70 @@ def reset_quiz_state():
     for key in list(st.session_state.keys()):
         if key.startswith("question_") or key in removable:
             del st.session_state[key]
+
+
+def set_source_mode(mode):
+    st.session_state.source_mode = mode
+
+
+def source_selector():
+    if "source_mode" not in st.session_state:
+        st.session_state.source_mode = "Paste text"
+
+    current_mode = st.session_state.source_mode
+
+    col1, col2, _ = st.columns([1, 1, 4])
+
+    with col1:
+        st.button(
+            "Paste text",
+            key="select_paste_text",
+            type=(
+                "primary"
+                if current_mode == "Paste text"
+                else "secondary"
+            ),
+            use_container_width=True,
+            on_click=set_source_mode,
+            args=("Paste text",)
+        )
+
+    with col2:
+        st.button(
+            "Upload PDF",
+            key="select_upload_pdf",
+            type=(
+                "primary"
+                if current_mode == "Upload PDF"
+                else "secondary"
+            ),
+            use_container_width=True,
+            on_click=set_source_mode,
+            args=("Upload PDF",)
+        )
+
+    return st.session_state.source_mode
+
+
+def set_answer(question_index, option):
+    st.session_state[f"question_{question_index}"] = option
+
+
+def answer_selector(question_index, options):
+    answer_key = f"question_{question_index}"
+    selected = st.session_state.get(answer_key)
+
+    for option_index, option in enumerate(options):
+        st.button(
+            option,
+            key=f"answer_button_{question_index}_{option_index}",
+            type="primary" if selected == option else "secondary",
+            use_container_width=True,
+            on_click=set_answer,
+            args=(question_index, option)
+        )
+
+    return st.session_state.get(answer_key)
 
 
 logo_uri = image_to_data_uri(LOGO_PATH)
@@ -90,8 +158,8 @@ st.markdown(
 
         50% {
             box-shadow:
-                0 15px 38px rgba(124, 58, 237, 0.24),
-                0 0 25px rgba(56, 189, 248, 0.12);
+                0 15px 38px rgba(124, 58, 237, 0.22),
+                0 0 25px rgba(56, 189, 248, 0.10);
         }
 
         100% {
@@ -146,7 +214,6 @@ st.markdown(
     h1 {
         font-weight: 800 !important;
         letter-spacing: -0.05em !important;
-        line-height: 1.08 !important;
     }
 
     h2 {
@@ -186,7 +253,6 @@ st.markdown(
         color: #747c8a;
         font-size: 0.84rem;
         margin-top: 5px;
-        line-height: 1.2;
     }
 
     .quizora-divider {
@@ -224,7 +290,8 @@ st.markdown(
         pointer-events: none;
         z-index: -1;
 
-        animation: glowPulse 7s ease-in-out infinite;
+        animation:
+            glowPulse 7s ease-in-out infinite;
     }
 
     .hero-title {
@@ -256,7 +323,8 @@ st.markdown(
         background-clip: text;
         color: transparent;
 
-        animation: gradientMove 8s ease infinite;
+        animation:
+            gradientMove 8s ease infinite;
     }
 
     .hero-copy {
@@ -336,7 +404,6 @@ st.markdown(
         align-items: center;
 
         padding: 0.4rem 0.72rem;
-
         margin-bottom: 0.8rem;
 
         border-radius: 999px;
@@ -363,7 +430,6 @@ st.markdown(
         font-weight: 760;
 
         letter-spacing: -0.035em;
-        line-height: 1.08;
 
         margin-bottom: 0.4rem;
     }
@@ -468,6 +534,7 @@ st.markdown(
         padding: 1rem 1.1rem;
 
         display: flex;
+
         align-items: center;
         justify-content: space-between;
 
@@ -530,7 +597,8 @@ st.markdown(
 
         background-size: 200% 200%;
 
-        animation: gradientMove 7s ease infinite;
+        animation:
+            gradientMove 7s ease infinite;
 
         box-shadow:
             0 10px 28px rgba(99, 102, 241, 0.18);
@@ -638,7 +706,6 @@ st.markdown(
     .analytics-top,
     .results-top {
         position: relative;
-
         z-index: 1;
 
         display: flex;
@@ -679,9 +746,7 @@ st.markdown(
     .analytics-chip-row,
     .results-chip-row {
         display: flex;
-
         flex-wrap: wrap;
-
         gap: 0.55rem;
     }
 
@@ -706,7 +771,6 @@ st.markdown(
     .analytics-grid,
     .results-grid {
         position: relative;
-
         z-index: 1;
 
         display: grid;
@@ -757,7 +821,6 @@ st.markdown(
         font-weight: 760;
 
         letter-spacing: -0.045em;
-
         line-height: 1.05;
 
         margin-bottom: 0.45rem;
@@ -815,7 +878,6 @@ st.markdown(
 
     .results-status {
         position: relative;
-
         z-index: 1;
 
         margin-bottom: 1rem;
@@ -924,9 +986,7 @@ st.markdown(
 
     [data-baseweb="select"] > div {
         min-height: 50px;
-
         background: #0b0e14;
-
         border-radius: 11px;
     }
 
@@ -946,46 +1006,59 @@ st.markdown(
         border-radius: 15px;
     }
 
-    .stRadio [role="radiogroup"] {
-        gap: 0.65rem;
-    }
-
-    .stRadio [role="radiogroup"] label {
-        padding: 0.55rem 0.85rem;
-
-        background:
-            rgba(255, 255, 255, 0.025);
-
-        border:
-            1px solid rgba(255, 255, 255, 0.07);
-
-        border-radius: 12px;
-    }
-
-    .stRadio [role="radiogroup"] label:hover {
-        background:
-            rgba(124, 58, 237, 0.06);
-
-        border-color:
-            rgba(124, 58, 237, 0.30);
-    }
-
     .stButton > button {
         min-height: 50px;
 
-        border-radius: 12px;
+        border-radius: 13px;
 
-        font-weight: 650;
+        font-weight: 620;
 
         transition:
-            transform 0.15s ease,
-            box-shadow 0.15s ease;
+            transform 0.16s ease,
+            border-color 0.16s ease,
+            background 0.16s ease,
+            box-shadow 0.16s ease;
+    }
+
+    .stButton > button[kind="secondary"] {
+        color: #e5e7eb !important;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.035),
+                rgba(255, 255, 255, 0.018)
+            ) !important;
+
+        border:
+            1px solid rgba(255, 255, 255, 0.09) !important;
+
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    }
+
+    .stButton > button[kind="secondary"]:hover {
+        color: #ffffff !important;
+
+        background:
+            linear-gradient(
+                100deg,
+                rgba(124, 58, 237, 0.09),
+                rgba(99, 102, 241, 0.055)
+            ) !important;
+
+        border-color:
+            rgba(129, 140, 248, 0.35) !important;
+
+        box-shadow:
+            0 8px 25px rgba(0, 0, 0, 0.14);
     }
 
     .stButton > button[kind="primary"] {
-        border: none;
+        color: #ffffff !important;
 
-        color: white;
+        border:
+            1px solid rgba(167, 139, 250, 0.30) !important;
 
         background:
             linear-gradient(
@@ -993,17 +1066,117 @@ st.markdown(
                 #7c3aed,
                 #6366f1,
                 #0ea5e9
-            );
+            ) !important;
 
-        background-size: 200% 200%;
+        background-size: 200% 200% !important;
 
         animation:
             gradientMove 7s ease infinite,
             buttonGlow 4s ease-in-out infinite;
+
+        box-shadow:
+            inset 0 1px 0 rgba(255, 255, 255, 0.14),
+            0 10px 28px rgba(99, 102, 241, 0.17);
     }
 
     .stButton > button:hover {
         transform: translateY(-1px);
+    }
+
+    .st-key-generate_quiz_button button {
+        min-height: 55px !important;
+
+        color: #ffffff !important;
+
+        border:
+            1px solid rgba(56, 189, 248, 0.38) !important;
+
+        background:
+            linear-gradient(
+                100deg,
+                #2563eb,
+                #0ea5e9,
+                #06b6d4
+            ) !important;
+
+        background-size: 200% 200% !important;
+
+        animation:
+            gradientMove 7s ease infinite !important;
+
+        box-shadow:
+            0 12px 32px rgba(14, 165, 233, 0.20) !important;
+
+        font-weight: 700 !important;
+    }
+
+    .st-key-generate_quiz_button button:hover {
+        border-color:
+            rgba(103, 232, 249, 0.65) !important;
+
+        box-shadow:
+            0 16px 40px rgba(14, 165, 233, 0.30) !important;
+    }
+
+    .st-key-submit_quiz_button button {
+        min-height: 57px !important;
+
+        color: #ffffff !important;
+
+        border:
+            1px solid rgba(251, 191, 36, 0.42) !important;
+
+        background:
+            linear-gradient(
+                100deg,
+                #b45309,
+                #d97706,
+                #f59e0b
+            ) !important;
+
+        background-size: 200% 200% !important;
+
+        animation:
+            gradientMove 7s ease infinite !important;
+
+        box-shadow:
+            0 12px 34px rgba(245, 158, 11, 0.20) !important;
+
+        font-weight: 700 !important;
+
+        border-radius: 13px !important;
+    }
+
+    .st-key-submit_quiz_button button:hover {
+        transform: translateY(-1px);
+
+        border-color:
+            rgba(253, 224, 71, 0.65) !important;
+
+        box-shadow:
+            0 17px 42px rgba(245, 158, 11, 0.32) !important;
+    }
+
+    .st-key-create_another_quiz button {
+        background:
+            rgba(255, 255, 255, 0.035) !important;
+
+        color: #e2e8f0 !important;
+
+        border:
+            1px solid rgba(255, 255, 255, 0.10) !important;
+
+        box-shadow: none !important;
+
+        animation: none !important;
+    }
+
+    .st-key-create_another_quiz button:hover {
+        background:
+            rgba(124, 58, 237, 0.08) !important;
+
+        border-color:
+            rgba(129, 140, 248, 0.35) !important;
     }
 
     [data-testid="stProgress"] > div > div {
@@ -1016,19 +1189,19 @@ st.markdown(
     }
 
     @media (prefers-reduced-motion: reduce) {
-
         .hero-title,
         .hero-wrap::before,
         .analytics-gradient-value,
         .results-gradient-value,
         .stButton > button[kind="primary"],
-        .go-to-quiz-button {
+        .go-to-quiz-button,
+        .st-key-generate_quiz_button button,
+        .st-key-submit_quiz_button button {
             animation: none !important;
         }
     }
 
     @media (max-width: 900px) {
-
         .analytics-grid,
         .results-grid {
             grid-template-columns:
@@ -1037,7 +1210,6 @@ st.markdown(
     }
 
     @media (max-width: 700px) {
-
         .block-container {
             padding-left: 1rem;
             padding-right: 1rem;
@@ -1093,7 +1265,6 @@ st.markdown(
     }
 
     @media (max-width: 560px) {
-
         .analytics-grid,
         .results-grid {
             grid-template-columns: 1fr;
@@ -1107,21 +1278,17 @@ st.markdown(
 
 
 try:
-
     api_key = st.secrets["GEMINI_API_KEY"]
 
 except KeyError:
-
     st.error(
         "Gemini API key was not found. "
         "Add GEMINI_API_KEY to .streamlit/secrets.toml."
     )
-
     st.stop()
 
 
 if logo_uri:
-
     brand_html = (
         '<div class="quizora-brand">'
         f'<img src="{logo_uri}" class="quizora-brand-logo">'
@@ -1136,7 +1303,6 @@ if logo_uri:
     )
 
 else:
-
     brand_html = (
         '<div class="quizora-brand">'
         '<div>'
@@ -1190,41 +1356,34 @@ st.markdown(
 )
 
 st.markdown(
-    '<div class="workspace-copy">'
-    'Add your study material and configure the quiz '
-    'before generating questions.'
-    '</div>',
+    (
+        '<div class="workspace-copy">'
+        'Add your study material and configure the quiz '
+        'before generating questions.'
+        '</div>'
+    ),
     unsafe_allow_html=True
 )
 
 
-with st.container(
-    border=True
-):
+with st.container(border=True):
 
     st.markdown(
-        '<div class="builder-header">'
-        '<div class="builder-step">Step 01 · Source</div>'
-        '<div class="builder-heading">Add study material</div>'
-        '<div class="builder-description">'
-        'Paste your notes or upload a PDF to use as '
-        'the source for your quiz.'
-        '</div>'
-        '</div>',
+        (
+            '<div class="builder-header">'
+            '<div class="builder-step">Step 01 · Source</div>'
+            '<div class="builder-heading">Add study material</div>'
+            '<div class="builder-description">'
+            'Paste your notes or upload a PDF to use as '
+            'the source for your quiz.'
+            '</div>'
+            '</div>'
+        ),
         unsafe_allow_html=True
     )
 
 
-    source_mode = st.radio(
-        "Source",
-        [
-            "Paste text",
-            "Upload PDF"
-        ],
-        horizontal=True,
-        label_visibility="collapsed"
-    )
-
+    source_mode = source_selector()
 
     study_text = ""
     source_name = ""
@@ -1238,7 +1397,8 @@ with st.container(
             placeholder=(
                 "Paste lecture notes, textbook content, "
                 "revision material, or other study text..."
-            )
+            ),
+            key="study_text_input"
         )
 
         source_name = "Pasted text"
@@ -1249,7 +1409,8 @@ with st.container(
         uploaded_file = st.file_uploader(
             "Upload PDF",
             type=["pdf"],
-            help="Text-based PDFs work best."
+            help="Text-based PDFs work best.",
+            key="study_pdf"
         )
 
 
@@ -1260,9 +1421,8 @@ with st.container(
                 with st.spinner(
                     "Reading document..."
                 ):
-
-                    study_text = extract_text_from_pdf(
-                        uploaded_file
+                    study_text = extract_pdf_text_cached(
+                        uploaded_file.getvalue()
                     )
 
 
@@ -1279,7 +1439,6 @@ with st.container(
                     with st.expander(
                         "Preview extracted text"
                     ):
-
                         st.write(
                             study_text[:4000]
                         )
@@ -1302,7 +1461,6 @@ with st.container(
                 with st.expander(
                     "Technical details"
                 ):
-
                     st.exception(
                         error
                     )
@@ -1333,32 +1491,31 @@ with st.container(
 
 
     st.markdown(
-        '<div class="builder-header">'
-        '<div class="builder-step">'
-        'Step 02 · Configuration'
-        '</div>'
-        '<div class="builder-heading">'
-        'Customize your quiz'
-        '</div>'
-        '<div class="builder-description">'
-        'Control the question format, difficulty, '
-        'and assessment length.'
-        '</div>'
-        '</div>',
+        (
+            '<div class="builder-header">'
+            '<div class="builder-step">'
+            'Step 02 · Configuration'
+            '</div>'
+            '<div class="builder-heading">'
+            'Customize your quiz'
+            '</div>'
+            '<div class="builder-description">'
+            'Control the question format, difficulty, '
+            'and assessment length.'
+            '</div>'
+            '</div>'
+        ),
         unsafe_allow_html=True
     )
 
 
-    settings_col1, settings_col2, settings_col3 = (
-        st.columns(
-            3,
-            gap="medium"
-        )
+    settings_col1, settings_col2, settings_col3 = st.columns(
+        3,
+        gap="medium"
     )
 
 
     with settings_col1:
-
         question_type = st.selectbox(
             "Question type",
             [
@@ -1370,7 +1527,6 @@ with st.container(
 
 
     with settings_col2:
-
         difficulty = st.selectbox(
             "Difficulty",
             [
@@ -1382,7 +1538,6 @@ with st.container(
 
 
     with settings_col3:
-
         num_questions = st.selectbox(
             "Number of questions",
             [
@@ -1400,27 +1555,17 @@ with st.container(
             '<div class="configuration-grid">'
 
             '<div class="configuration-card">'
-            '<div class="configuration-label">'
-            'Format'
-            '</div>'
-            f'<div class="configuration-value">'
-            f'{question_type}'
-            '</div>'
+            '<div class="configuration-label">Format</div>'
+            f'<div class="configuration-value">{question_type}</div>'
             '</div>'
 
             '<div class="configuration-card">'
-            '<div class="configuration-label">'
-            'Difficulty'
-            '</div>'
-            f'<div class="configuration-value">'
-            f'{difficulty}'
-            '</div>'
+            '<div class="configuration-label">Difficulty</div>'
+            f'<div class="configuration-value">{difficulty}</div>'
             '</div>'
 
             '<div class="configuration-card">'
-            '<div class="configuration-label">'
-            'Quiz Length'
-            '</div>'
+            '<div class="configuration-label">Quiz Length</div>'
             f'<div class="configuration-value">'
             f'{num_questions} questions'
             '</div>'
@@ -1432,15 +1577,10 @@ with st.container(
     )
 
 
-    MAX_CHARACTERS = 30000
-
-    prepared_text = study_text[
-        :MAX_CHARACTERS
-    ]
+    prepared_text = study_text[:MAX_CHARACTERS]
 
 
     if len(study_text) > MAX_CHARACTERS:
-
         st.info(
             "The first 30,000 characters will be used."
         )
@@ -1451,6 +1591,7 @@ with st.container(
 
     generate_button = st.button(
         "Generate quiz",
+        key="generate_quiz_button",
         type="primary",
         use_container_width=True
     )
@@ -1533,7 +1674,6 @@ if generate_button:
             with st.expander(
                 "Technical details"
             ):
-
                 st.exception(
                     error
                 )
@@ -1568,8 +1708,7 @@ if (
 
 
     remaining_count = (
-        len(quiz)
-        - answered_count
+        len(quiz) - answered_count
     )
 
 
@@ -1578,8 +1717,7 @@ if (
             (
                 answered_count
                 / len(quiz)
-            )
-            * 100
+            ) * 100
         )
         if len(quiz) > 0
         else 0
@@ -1587,8 +1725,10 @@ if (
 
 
     st.markdown(
-        '<div id="quiz-dashboard" '
-        'class="quiz-anchor"></div>',
+        (
+            '<div id="quiz-dashboard" '
+            'class="quiz-anchor"></div>'
+        ),
         unsafe_allow_html=True
     )
 
@@ -1640,21 +1780,15 @@ if (
         '<div class="analytics-grid">'
 
         '<div class="analytics-card">'
-        '<div class="analytics-label">'
-        'Questions'
-        '</div>'
-        f'<div class="analytics-value">'
-        f'{len(quiz)}'
-        '</div>'
+        '<div class="analytics-label">Questions</div>'
+        f'<div class="analytics-value">{len(quiz)}</div>'
         '<div class="analytics-note">'
         'Total assessment items'
         '</div>'
         '</div>'
 
         '<div class="analytics-card">'
-        '<div class="analytics-label">'
-        'Difficulty'
-        '</div>'
+        '<div class="analytics-label">Difficulty</div>'
         '<div class="analytics-value '
         'analytics-gradient-value">'
         f'{quiz_config.get("difficulty", difficulty)}'
@@ -1665,9 +1799,7 @@ if (
         '</div>'
 
         '<div class="analytics-card">'
-        '<div class="analytics-label">'
-        'Format'
-        '</div>'
+        '<div class="analytics-label">Format</div>'
         '<div class="analytics-value '
         'analytics-value-small">'
         f'{quiz_config.get("question_type", question_type)}'
@@ -1678,9 +1810,7 @@ if (
         '</div>'
 
         '<div class="analytics-card">'
-        '<div class="analytics-label">'
-        'Completion'
-        '</div>'
+        '<div class="analytics-label">Completion</div>'
         f'<div class="analytics-value">'
         f'{completion_percent}%'
         '</div>'
@@ -1736,12 +1866,9 @@ if (
             )
 
 
-            selected_answer = st.radio(
-                "Choose an answer",
-                question["options"],
-                key=f"question_{index}",
-                index=None,
-                label_visibility="collapsed"
+            selected_answer = answer_selector(
+                index,
+                question["options"]
             )
 
 
@@ -1750,8 +1877,12 @@ if (
             ] = selected_answer
 
 
+    st.write("")
+
+
     submit_button = st.button(
         "Submit quiz",
+        key="submit_quiz_button",
         type="primary",
         use_container_width=True
     )
@@ -1777,10 +1908,7 @@ if (
             st.caption(
                 "Unanswered questions: "
                 + ", ".join(
-                    map(
-                        str,
-                        unanswered
-                    )
+                    map(str, unanswered)
                 )
             )
 
@@ -1815,9 +1943,7 @@ if st.session_state.get(
     quiz = st.session_state.quiz
 
 
-    total = len(
-        quiz
-    )
+    total = len(quiz)
 
     correct = score
 
@@ -1825,8 +1951,7 @@ if st.session_state.get(
 
 
     percentage = (
-        score
-        / total
+        score / total
     ) * 100
 
 
@@ -1837,8 +1962,7 @@ if st.session_state.get(
         performance_label = "Excellent"
 
         status_text = (
-            "Strong performance. "
-            "You demonstrated a very good "
+            "Strong performance. You demonstrated a very good "
             "understanding of this material."
         )
 
@@ -1862,8 +1986,8 @@ if st.session_state.get(
         performance_label = "Needs Review"
 
         status_text = (
-            "More revision is recommended. "
-            "Review the answers below before trying again."
+            "More revision is recommended. Review the answers "
+            "below before trying again."
         )
 
 
@@ -1918,21 +2042,15 @@ if st.session_state.get(
         '<div class="results-grid">'
 
         '<div class="results-card">'
-        '<div class="results-label">'
-        'Score'
-        '</div>'
-        f'<div class="results-value">'
-        f'{score}/{total}'
-        '</div>'
+        '<div class="results-label">Score</div>'
+        f'<div class="results-value">{score}/{total}</div>'
         '<div class="results-note">'
         'Final quiz score'
         '</div>'
         '</div>'
 
         '<div class="results-card">'
-        '<div class="results-label">'
-        'Accuracy'
-        '</div>'
+        '<div class="results-label">Accuracy</div>'
         '<div class="results-value '
         'results-gradient-value">'
         f'{percentage:.0f}%'
@@ -1943,24 +2061,16 @@ if st.session_state.get(
         '</div>'
 
         '<div class="results-card">'
-        '<div class="results-label">'
-        'Correct'
-        '</div>'
-        f'<div class="results-value">'
-        f'{correct}'
-        '</div>'
+        '<div class="results-label">Correct</div>'
+        f'<div class="results-value">{correct}</div>'
         '<div class="results-note">'
         'Correct responses'
         '</div>'
         '</div>'
 
         '<div class="results-card">'
-        '<div class="results-label">'
-        'Incorrect'
-        '</div>'
-        f'<div class="results-value">'
-        f'{incorrect}'
-        '</div>'
+        '<div class="results-label">Incorrect</div>'
+        f'<div class="results-value">{incorrect}</div>'
         '<div class="results-note">'
         'Questions to review'
         '</div>'
@@ -1993,26 +2103,24 @@ if st.session_state.get(
 
 
     st.markdown(
-        '<div class="sub-label">'
-        'Review'
-        '</div>',
+        '<div class="sub-label">Review</div>',
         unsafe_allow_html=True
     )
 
 
     st.markdown(
-        '<div class="sub-title">'
-        'Answer review'
-        '</div>',
+        '<div class="sub-title">Answer review</div>',
         unsafe_allow_html=True
     )
 
 
     st.markdown(
-        '<div class="sub-copy">'
-        'Review each response and compare it '
-        'with the correct answer.'
-        '</div>',
+        (
+            '<div class="sub-copy">'
+            'Review each response and compare it '
+            'with the correct answer.'
+            '</div>'
+        ),
         unsafe_allow_html=True
     )
 
@@ -2071,7 +2179,7 @@ if st.session_state.get(
 
     if st.button(
         "Create another quiz",
-        type="primary",
+        key="create_another_quiz",
         use_container_width=True
     ):
 
@@ -2082,6 +2190,7 @@ if st.session_state.get(
 
 st.write("")
 st.write("")
+
 st.divider()
 
 
