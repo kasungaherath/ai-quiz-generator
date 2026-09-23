@@ -3,6 +3,97 @@ import time
 from google import genai
 
 
+def clean_json_response(text):
+    text = text.strip()
+
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+
+    if text.endswith("```"):
+        text = text[:-3]
+
+    return text.strip()
+
+
+def validate_question(question, question_type):
+    if not isinstance(question, dict):
+        return False
+
+    if "question" not in question:
+        return False
+
+    if "options" not in question:
+        return False
+
+    if "answer" not in question:
+        return False
+
+    options = question["options"]
+    answer = question["answer"]
+
+    if not isinstance(options, list):
+        return False
+
+    if answer not in options:
+        return False
+
+    if question_type == "Multiple Choice":
+
+        if len(options) != 4:
+            return False
+
+        normalized = [
+            str(option).strip().lower()
+            for option in options
+        ]
+
+        if normalized == ["true", "false"]:
+            return False
+
+        question["type"] = "mcq"
+
+        return True
+
+    if question_type == "True/False":
+
+        normalized = {
+            str(option).strip().lower()
+            for option in options
+        }
+
+        if normalized != {"true", "false"}:
+            return False
+
+        if len(options) != 2:
+            return False
+
+        question["type"] = "true_false"
+
+        return True
+
+    if question_type == "Mixed":
+
+        if len(options) == 4:
+            question["type"] = "mcq"
+            return True
+
+        normalized = {
+            str(option).strip().lower()
+            for option in options
+        }
+
+        if (
+            len(options) == 2
+            and normalized == {"true", "false"}
+        ):
+            question["type"] = "true_false"
+            return True
+
+    return False
+
+
 def generate_quiz(
     api_key,
     study_text,
@@ -10,33 +101,83 @@ def generate_quiz(
     question_type,
     difficulty
 ):
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(
+        api_key=api_key
+    )
+
+    if question_type == "Multiple Choice":
+
+        type_rules = """
+IMPORTANT QUESTION TYPE RULES:
+
+You MUST generate ONLY multiple-choice questions.
+
+Every question MUST:
+- Have exactly 4 answer options.
+- Have exactly one correct answer.
+- Use type "mcq".
+- NEVER use True/False questions.
+- NEVER use only True and False as the options.
+"""
+
+    elif question_type == "True/False":
+
+        type_rules = """
+IMPORTANT QUESTION TYPE RULES:
+
+You MUST generate ONLY True/False questions.
+
+Every question MUST:
+- Have exactly 2 options.
+- The options MUST be "True" and "False".
+- Use type "true_false".
+- Have exactly one correct answer.
+- NEVER generate multiple-choice questions.
+"""
+
+    else:
+
+        type_rules = """
+IMPORTANT QUESTION TYPE RULES:
+
+Generate a mixture of multiple-choice and True/False questions.
+
+For multiple-choice:
+- Use type "mcq".
+- Use exactly 4 options.
+
+For True/False:
+- Use type "true_false".
+- Use exactly 2 options: "True" and "False".
+"""
 
     prompt = f"""
 You are an educational quiz generator.
 
-Generate exactly {num_questions} {difficulty.lower()} difficulty quiz questions.
+Generate EXACTLY {num_questions} quiz questions.
 
-Question type:
+Difficulty:
+{difficulty}
+
+Selected question type:
 {question_type}
+
+{type_rules}
 
 Use ONLY the study material provided below.
 
-Requirements:
+General requirements:
 
-1. Questions must be based only on the study material.
-2. Do not use outside knowledge.
-3. Multiple-choice questions must have exactly 4 options.
-4. True/False questions must have exactly 2 options:
-   True and False.
-5. Each question must have exactly one correct answer.
-6. Do not create duplicate questions.
-7. The value in "answer" must exactly match one item in "options".
-8. Return valid JSON only.
-9. Do not include Markdown code fences.
-10. Do not include explanations outside the JSON.
+- Do not use outside knowledge.
+- Do not repeat questions.
+- Each question must have exactly one correct answer.
+- The value of "answer" must exactly match one option.
+- Return valid JSON only.
+- Do not include Markdown.
+- Do not include explanations.
+- Do not include text before or after the JSON.
 
-Return data in this format:
+Return this JSON structure:
 
 [
     {{
@@ -52,26 +193,14 @@ Return data in this format:
     }}
 ]
 
-For True/False questions use this format:
-
-[
-    {{
-        "question": "Question text",
-        "type": "true_false",
-        "options": [
-            "True",
-            "False"
-        ],
-        "answer": "True"
-    }}
-]
-
 Study material:
 
 {study_text}
 """
 
-    max_retries = 3
+    max_retries = 4
+
+    last_error = None
 
     for attempt in range(max_retries):
 
@@ -83,91 +212,68 @@ Study material:
 
             if not response.text:
                 raise ValueError(
-                    "Gemini returned an empty response."
+                    "The AI returned an empty response."
                 )
 
-            result = response.text.strip()
+            cleaned_response = clean_json_response(
+                response.text
+            )
 
-            # Remove Markdown fences if Gemini adds them
-            if result.startswith("```json"):
-                result = result[7:]
+            quiz = json.loads(
+                cleaned_response
+            )
 
-            elif result.startswith("```"):
-                result = result[3:]
-
-            if result.endswith("```"):
-                result = result[:-3]
-
-            result = result.strip()
-
-            quiz = json.loads(result)
-
-            # Basic validation
             if not isinstance(quiz, list):
                 raise ValueError(
-                    "The generated quiz is not a valid list."
-                )
-
-            if len(quiz) == 0:
-                raise ValueError(
-                    "The generated quiz contains no questions."
+                    "Quiz response must be a list."
                 )
 
             valid_questions = []
 
             for question in quiz:
 
-                if not isinstance(question, dict):
-                    continue
-
-                if "question" not in question:
-                    continue
-
-                if "options" not in question:
-                    continue
-
-                if "answer" not in question:
-                    continue
-
-                if not isinstance(
-                    question["options"],
-                    list
+                if validate_question(
+                    question,
+                    question_type
                 ):
-                    continue
+                    valid_questions.append(
+                        question
+                    )
 
-                if (
-                    question["answer"]
-                    not in question["options"]
-                ):
-                    continue
+            if len(valid_questions) != num_questions:
 
-                valid_questions.append(question)
-
-            if len(valid_questions) == 0:
                 raise ValueError(
-                    "Gemini did not return any valid quiz questions."
+                    f"Expected {num_questions} valid "
+                    f"{question_type} questions, but received "
+                    f"{len(valid_questions)}."
                 )
 
             return valid_questions
 
         except Exception as error:
 
-            error_message = str(error).lower()
+            last_error = error
+
+            error_text = str(
+                error
+            ).lower()
 
             temporary_error = (
-                "503" in error_message
-                or "unavailable" in error_message
-                or "high demand" in error_message
-                or "429" in error_message
-                or "resource_exhausted" in error_message
-                or "rate limit" in error_message
+                "503" in error_text
+                or "unavailable" in error_text
+                or "high demand" in error_text
+                or "429" in error_text
+                or "rate limit" in error_text
+                or "resource_exhausted" in error_text
             )
 
-            if (
-                temporary_error
-                and attempt < max_retries - 1
-            ):
-                time.sleep(2)
+            if attempt < max_retries - 1:
+
+                if temporary_error:
+                    time.sleep(3)
+                else:
+                    time.sleep(1)
+
                 continue
 
-            raise error
+            raise last_error

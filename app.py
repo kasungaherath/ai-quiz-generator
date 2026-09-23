@@ -54,9 +54,11 @@ st.markdown(
         0% {
             background-position: 0% 50%;
         }
+
         50% {
             background-position: 100% 50%;
         }
+
         100% {
             background-position: 0% 50%;
         }
@@ -64,16 +66,18 @@ st.markdown(
 
     @keyframes glowPulse {
         0% {
-            opacity: 0.22;
-            transform: translateX(-50%) scale(0.95);
+            opacity: 0.20;
+            transform: translateX(-50%) scale(0.96);
         }
+
         50% {
-            opacity: 0.48;
-            transform: translateX(-50%) scale(1.05);
+            opacity: 0.45;
+            transform: translateX(-50%) scale(1.04);
         }
+
         100% {
-            opacity: 0.22;
-            transform: translateX(-50%) scale(0.95);
+            opacity: 0.20;
+            transform: translateX(-50%) scale(0.96);
         }
     }
 
@@ -83,11 +87,13 @@ st.markdown(
                 0 12px 30px rgba(99, 102, 241, 0.12),
                 0 0 0 rgba(56, 189, 248, 0);
         }
+
         50% {
             box-shadow:
                 0 15px 38px rgba(124, 58, 237, 0.24),
                 0 0 25px rgba(56, 189, 248, 0.12);
         }
+
         100% {
             box-shadow:
                 0 12px 30px rgba(99, 102, 241, 0.12),
@@ -113,9 +119,6 @@ st.markdown(
                 transparent 30%
             ),
             #080a0f;
-
-        background-size: 150% 150%;
-        animation: gradientMove 20s ease infinite;
     }
 
     .block-container {
@@ -245,6 +248,7 @@ st.markdown(
 
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+
         background-clip: text;
         color: transparent;
 
@@ -265,56 +269,70 @@ st.markdown(
         font-weight: 500;
     }
 
-    .workspace-badge {
+    .workspace-badge,
+    .analytics-badge,
+    .results-badge {
         display: inline-block;
-        padding: 0.42rem 0.8rem;
-        margin-bottom: 0.9rem;
+
+        padding: 0.42rem 0.78rem;
+        margin-bottom: 0.8rem;
 
         border-radius: 999px;
 
         background:
             linear-gradient(
                 90deg,
-                rgba(124, 58, 237, 0.16),
-                rgba(14, 165, 233, 0.10)
+                rgba(124, 58, 237, 0.18),
+                rgba(14, 165, 233, 0.12)
             );
 
         border:
             1px solid rgba(129, 140, 248, 0.16);
 
-        color: #b8b9ff;
+        color: #c7d2fe;
+
         font-size: 0.7rem;
         font-weight: 700;
+
         letter-spacing: 0.12em;
         text-transform: uppercase;
     }
 
     .workspace-title {
         color: #f8fafc;
+
         font-size: 2.75rem;
         font-weight: 800;
+
         letter-spacing: -0.05em;
         line-height: 1.06;
+
         margin-bottom: 0.55rem;
     }
 
     .workspace-copy {
         max-width: 750px;
+
         color: #8f97a6;
+
         font-size: 1rem;
         line-height: 1.75;
+
         margin-bottom: 1.7rem;
     }
 
     .feature-row {
         display: flex;
         flex-wrap: wrap;
+
         gap: 0.65rem;
+
         margin-bottom: 1.5rem;
     }
 
     .feature-pill {
         padding: 0.48rem 0.8rem;
+
         border-radius: 999px;
 
         background:
@@ -324,30 +342,462 @@ st.markdown(
             1px solid rgba(255, 255, 255, 0.07);
 
         color: #989fad;
+
         font-size: 0.8rem;
+    }
+
+    .builder-header {
+        position: relative;
+        z-index: 1;
+
+        margin-bottom: 1.35rem;
+    }
+
+    .builder-step {
+        display: inline-flex;
+        align-items: center;
+
+        padding: 0.4rem 0.72rem;
+
+        margin-bottom: 0.8rem;
+
+        border-radius: 999px;
+
+        color: #c7d2fe;
+
+        background:
+            rgba(99, 102, 241, 0.08);
+
+        border:
+            1px solid rgba(129, 140, 248, 0.16);
+
+        font-size: 0.69rem;
+        font-weight: 700;
+
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+    }
+
+    .builder-heading {
+        color: #f8fafc;
+
+        font-size: 1.65rem;
+        font-weight: 760;
+
+        letter-spacing: -0.035em;
+        line-height: 1.08;
+
+        margin-bottom: 0.4rem;
+    }
+
+    .builder-description {
+        max-width: 700px;
+
+        color: #828b9a;
+
+        font-size: 0.94rem;
+        line-height: 1.65;
+    }
+
+    .builder-divider {
+        height: 1px;
+
+        margin:
+            1.8rem 0;
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.08),
+                rgba(129, 140, 248, 0.10),
+                rgba(255, 255, 255, 0.04)
+            );
+    }
+
+    .configuration-grid {
+        display: grid;
+
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+
+        gap: 1rem;
+
+        margin-top: 1.1rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .configuration-card {
+        padding: 1rem;
+
+        border-radius: 15px;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.028),
+                rgba(255, 255, 255, 0.012)
+            );
+
+        border:
+            1px solid rgba(255, 255, 255, 0.065);
+    }
+
+    .configuration-label {
+        color: #747d8d;
+
+        font-size: 0.68rem;
+        font-weight: 700;
+
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+
+        margin-bottom: 0.45rem;
+    }
+
+    .configuration-value {
+        color: #f1f5f9;
+
+        font-size: 1rem;
+        font-weight: 650;
+    }
+
+    .input-status {
+        display: flex;
+
+        justify-content: space-between;
+        align-items: center;
+
+        gap: 1rem;
+
+        margin-top: 0.8rem;
+
+        padding:
+            0.7rem 0.85rem;
+
+        border-radius: 11px;
+
+        background:
+            rgba(255, 255, 255, 0.02);
+
+        border:
+            1px solid rgba(255, 255, 255, 0.055);
+
+        color: #818998;
+
+        font-size: 0.79rem;
     }
 
     .sub-label {
         color: #8b8ff8;
+
         font-size: 0.7rem;
         font-weight: 700;
+
         letter-spacing: 0.12em;
         text-transform: uppercase;
+
         margin-bottom: 0.4rem;
     }
 
     .sub-title {
         color: #f1f5f9;
+
         font-size: 1.25rem;
         font-weight: 720;
+
         letter-spacing: -0.025em;
+
         margin-bottom: 0.3rem;
     }
 
     .sub-copy {
         color: #828b9b;
+
         line-height: 1.65;
+
         margin-bottom: 1.1rem;
+    }
+
+    .analytics-board,
+    .results-board {
+        position: relative;
+        overflow: hidden;
+
+        padding: 1.5rem;
+
+        margin-bottom: 1.4rem;
+
+        border-radius: 22px;
+
+        background:
+            linear-gradient(
+                145deg,
+                rgba(18, 21, 31, 0.95),
+                rgba(9, 12, 18, 0.96)
+            );
+
+        border:
+            1px solid rgba(255, 255, 255, 0.075);
+
+        box-shadow:
+            0 25px 70px rgba(0, 0, 0, 0.24);
+    }
+
+    .analytics-board::before,
+    .results-board::before {
+        content: "";
+
+        position: absolute;
+
+        width: 320px;
+        height: 320px;
+
+        top: -180px;
+        right: -90px;
+
+        border-radius: 50%;
+
+        background:
+            radial-gradient(
+                circle,
+                rgba(99, 102, 241, 0.18),
+                transparent 70%
+            );
+
+        pointer-events: none;
+    }
+
+    .analytics-top,
+    .results-top {
+        position: relative;
+        z-index: 1;
+
+        display: flex;
+
+        justify-content: space-between;
+        align-items: flex-start;
+
+        gap: 1.2rem;
+
+        flex-wrap: wrap;
+
+        margin-bottom: 1.35rem;
+    }
+
+    .analytics-title,
+    .results-title {
+        color: #f8fafc;
+
+        font-size: 2.45rem;
+        font-weight: 800;
+
+        letter-spacing: -0.05em;
+        line-height: 1.05;
+
+        margin-bottom: 0.45rem;
+    }
+
+    .analytics-subtitle,
+    .results-subtitle {
+        color: #8f97a6;
+
+        font-size: 0.97rem;
+        line-height: 1.65;
+
+        max-width: 690px;
+    }
+
+    .analytics-chip-row,
+    .results-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+
+        gap: 0.55rem;
+    }
+
+    .analytics-chip,
+    .results-chip {
+        padding:
+            0.48rem 0.75rem;
+
+        border-radius: 999px;
+
+        background:
+            rgba(255, 255, 255, 0.025);
+
+        border:
+            1px solid rgba(255, 255, 255, 0.07);
+
+        color: #a1a8b5;
+
+        font-size: 0.77rem;
+        font-weight: 500;
+    }
+
+    .analytics-grid,
+    .results-grid {
+        position: relative;
+        z-index: 1;
+
+        display: grid;
+
+        grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+
+        gap: 0.9rem;
+    }
+
+    .analytics-card,
+    .results-card {
+        padding: 1.15rem;
+
+        min-height: 138px;
+
+        border-radius: 17px;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.035),
+                rgba(255, 255, 255, 0.013)
+            );
+
+        border:
+            1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .analytics-label,
+    .results-label {
+        color: #808999;
+
+        font-size: 0.7rem;
+        font-weight: 700;
+
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+
+        margin-bottom: 0.8rem;
+    }
+
+    .analytics-value,
+    .results-value {
+        color: #f8fafc;
+
+        font-size: 2.2rem;
+        font-weight: 760;
+
+        letter-spacing: -0.045em;
+        line-height: 1.05;
+
+        margin-bottom: 0.45rem;
+    }
+
+    .analytics-value-small {
+        font-size: 1.5rem;
+    }
+
+    .analytics-gradient-value,
+    .results-gradient-value {
+        background:
+            linear-gradient(
+                90deg,
+                #c4b5fd,
+                #818cf8,
+                #38bdf8,
+                #5eead4
+            );
+
+        background-size: 200% 200%;
+
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+
+        background-clip: text;
+        color: transparent;
+
+        animation:
+            gradientMove 7s ease infinite;
+    }
+
+    .analytics-note,
+    .results-note {
+        color: #6f7888;
+
+        font-size: 0.82rem;
+
+        line-height: 1.4;
+    }
+
+    .analytics-progress-top,
+    .results-progress-top {
+        display: flex;
+
+        justify-content: space-between;
+
+        color: #808999;
+
+        font-size: 0.82rem;
+
+        margin-top: 1.2rem;
+        margin-bottom: 0.55rem;
+    }
+
+    .results-status {
+        position: relative;
+        z-index: 1;
+
+        margin-bottom: 1rem;
+
+        padding: 1rem 1.1rem;
+
+        border-radius: 15px;
+
+        font-size: 0.92rem;
+        font-weight: 600;
+
+        line-height: 1.5;
+    }
+
+    .results-status.good {
+        color: #dcfce7;
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(34, 197, 94, 0.17),
+                rgba(16, 185, 129, 0.08)
+            );
+
+        border:
+            1px solid rgba(34, 197, 94, 0.20);
+    }
+
+    .results-status.medium {
+        color: #dbeafe;
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(59, 130, 246, 0.17),
+                rgba(14, 165, 233, 0.08)
+            );
+
+        border:
+            1px solid rgba(59, 130, 246, 0.20);
+    }
+
+    .results-status.low {
+        color: #fef3c7;
+
+        background:
+            linear-gradient(
+                90deg,
+                rgba(245, 158, 11, 0.18),
+                rgba(234, 179, 8, 0.08)
+            );
+
+        border:
+            1px solid rgba(245, 158, 11, 0.20);
     }
 
     [data-testid="stVerticalBlockBorderWrapper"] {
@@ -357,7 +807,7 @@ st.markdown(
             linear-gradient(
                 180deg,
                 rgba(18, 21, 30, 0.88),
-                rgba(11, 14, 20, 0.92)
+                rgba(10, 13, 19, 0.94)
             );
 
         border:
@@ -371,7 +821,7 @@ st.markdown(
     }
 
     textarea {
-        min-height: 280px !important;
+        min-height: 250px !important;
 
         background:
             linear-gradient(
@@ -402,7 +852,9 @@ st.markdown(
 
     [data-baseweb="select"] > div {
         min-height: 50px;
+
         background: #0b0e14;
+
         border-radius: 11px;
     }
 
@@ -446,25 +898,11 @@ st.markdown(
             rgba(124, 58, 237, 0.30);
     }
 
-    [data-testid="stMetric"] {
-        padding: 1rem 1.1rem;
-
-        background:
-            linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.032),
-                rgba(255, 255, 255, 0.015)
-            );
-
-        border:
-            1px solid rgba(255, 255, 255, 0.07);
-
-        border-radius: 14px;
-    }
-
     .stButton > button {
         min-height: 50px;
+
         border-radius: 12px;
+
         font-weight: 650;
 
         transition:
@@ -474,6 +912,7 @@ st.markdown(
 
     .stButton > button[kind="primary"] {
         border: none;
+
         color: white;
 
         background:
@@ -500,19 +939,32 @@ st.markdown(
     }
 
     hr {
-        border-color: rgba(255, 255, 255, 0.07);
+        border-color:
+            rgba(255, 255, 255, 0.07);
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .stApp,
+
         .hero-title,
         .hero-wrap::before,
+        .analytics-gradient-value,
+        .results-gradient-value,
         .stButton > button[kind="primary"] {
             animation: none !important;
         }
     }
 
+    @media (max-width: 900px) {
+
+        .analytics-grid,
+        .results-grid {
+            grid-template-columns:
+                repeat(2, minmax(0, 1fr));
+        }
+    }
+
     @media (max-width: 700px) {
+
         .block-container {
             padding-left: 1rem;
             padding-right: 1rem;
@@ -547,8 +999,22 @@ st.markdown(
             width: 330px;
         }
 
-        .workspace-title {
-            font-size: 2.2rem;
+        .workspace-title,
+        .analytics-title,
+        .results-title {
+            font-size: 2rem;
+        }
+
+        .configuration-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 560px) {
+
+        .analytics-grid,
+        .results-grid {
+            grid-template-columns: 1fr;
         }
     }
 
@@ -566,10 +1032,12 @@ except KeyError:
         "Gemini API key was not found. "
         "Add GEMINI_API_KEY to .streamlit/secrets.toml."
     )
+
     st.stop()
 
 
 if logo_uri:
+
     brand_html = (
         '<div class="quizora-brand">'
         f'<img src="{logo_uri}" class="quizora-brand-logo">'
@@ -582,7 +1050,9 @@ if logo_uri:
         '</div>'
         '<div class="quizora-divider"></div>'
     )
+
 else:
+
     brand_html = (
         '<div class="quizora-brand">'
         '<div>'
@@ -594,6 +1064,7 @@ else:
         '</div>'
         '<div class="quizora-divider"></div>'
     )
+
 
 st.markdown(
     brand_html,
@@ -635,25 +1106,10 @@ st.markdown(
 )
 
 st.markdown(
-    (
-        '<div class="workspace-copy">'
-        'Transform your study material into a focused assessment. '
-        'Choose your content source, customize the experience, '
-        'and generate questions designed around your material.'
-        '</div>'
-    ),
-    unsafe_allow_html=True
-)
-
-st.markdown(
-    (
-        '<div class="feature-row">'
-        '<span class="feature-pill">Text and PDF input</span>'
-        '<span class="feature-pill">MCQ and True/False</span>'
-        '<span class="feature-pill">Difficulty control</span>'
-        '<span class="feature-pill">Instant evaluation</span>'
-        '</div>'
-    ),
+    '<div class="workspace-copy">'
+    'Add your study material and configure the quiz '
+    'before generating questions.'
+    '</div>',
     unsafe_allow_html=True
 )
 
@@ -661,27 +1117,20 @@ st.markdown(
 with st.container(border=True):
 
     st.markdown(
-        '<div class="sub-label">Source</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="sub-title">Add study material</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        (
-            '<div class="sub-copy">'
-            'Paste your notes directly or upload a text-based PDF.'
-            '</div>'
-        ),
+        '<div class="builder-header">'
+        '<div class="builder-step">Step 01 · Source</div>'
+        '<div class="builder-heading">Add study material</div>'
+        '<div class="builder-description">'
+        'Paste your notes or upload a PDF to use as '
+        'the source for your quiz.'
+        '</div>'
+        '</div>',
         unsafe_allow_html=True
     )
 
 
     source_mode = st.radio(
-        "Choose an input method",
+        "Source",
         [
             "Paste text",
             "Upload PDF"
@@ -699,7 +1148,7 @@ with st.container(border=True):
 
         study_text = st.text_area(
             "Study material",
-            height=280,
+            height=260,
             placeholder=(
                 "Paste lecture notes, textbook content, "
                 "revision material, or other study text..."
@@ -714,7 +1163,7 @@ with st.container(border=True):
         uploaded_file = st.file_uploader(
             "Upload PDF",
             type=["pdf"],
-            help="Text-based PDF documents work best."
+            help="Text-based PDFs work best."
         )
 
 
@@ -730,18 +1179,21 @@ with st.container(border=True):
                         uploaded_file
                     )
 
+
                 source_name = uploaded_file.name
 
 
                 if study_text:
 
                     st.success(
-                        "Document processed successfully."
+                        "Document ready."
                     )
+
 
                     with st.expander(
                         "Preview extracted text"
                     ):
+
                         st.write(
                             study_text[:4000]
                         )
@@ -750,7 +1202,7 @@ with st.container(border=True):
                 else:
 
                     st.warning(
-                        "No readable text was found in this PDF."
+                        "No readable text was found."
                     )
 
 
@@ -760,9 +1212,11 @@ with st.container(border=True):
                     "The PDF could not be processed."
                 )
 
+
                 with st.expander(
                     "Technical details"
                 ):
+
                     st.exception(error)
 
 
@@ -772,38 +1226,49 @@ with st.container(border=True):
             study_text.split()
         )
 
-        st.caption(
-            f"{source_name} | {word_count:,} words"
+
+        st.markdown(
+            '<div class="input-status">'
+            f'<span>{source_name}</span>'
+            f'<span>{word_count:,} words</span>'
+            '</div>',
+            unsafe_allow_html=True
         )
 
 
-    st.divider()
-
-
     st.markdown(
-        '<div class="sub-label">Configuration</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="sub-title">Customize your quiz</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        (
-            '<div class="sub-copy">'
-            'Choose the question format, difficulty, and quiz length.'
-            '</div>'
-        ),
+        '<div class="builder-divider"></div>',
         unsafe_allow_html=True
     )
 
 
-    col1, col2, col3 = st.columns(3)
+    st.markdown(
+        '<div class="builder-header">'
+        '<div class="builder-step">'
+        'Step 02 · Configuration'
+        '</div>'
+        '<div class="builder-heading">'
+        'Customize your quiz'
+        '</div>'
+        '<div class="builder-description">'
+        'Control the question format, difficulty, '
+        'and assessment length.'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
 
-    with col1:
+    settings_col1, settings_col2, settings_col3 = (
+        st.columns(
+            3,
+            gap="medium"
+        )
+    )
+
+
+    with settings_col1:
+
         question_type = st.selectbox(
             "Question type",
             [
@@ -814,7 +1279,8 @@ with st.container(border=True):
         )
 
 
-    with col2:
+    with settings_col2:
+
         difficulty = st.selectbox(
             "Difficulty",
             [
@@ -825,7 +1291,8 @@ with st.container(border=True):
         )
 
 
-    with col3:
+    with settings_col3:
+
         num_questions = st.selectbox(
             "Number of questions",
             [
@@ -838,6 +1305,41 @@ with st.container(border=True):
         )
 
 
+    st.markdown(
+        '<div class="configuration-grid">'
+
+        '<div class="configuration-card">'
+        '<div class="configuration-label">'
+        'Format'
+        '</div>'
+        f'<div class="configuration-value">'
+        f'{question_type}'
+        '</div>'
+        '</div>'
+
+        '<div class="configuration-card">'
+        '<div class="configuration-label">'
+        'Difficulty'
+        '</div>'
+        f'<div class="configuration-value">'
+        f'{difficulty}'
+        '</div>'
+        '</div>'
+
+        '<div class="configuration-card">'
+        '<div class="configuration-label">'
+        'Quiz Length'
+        '</div>'
+        f'<div class="configuration-value">'
+        f'{num_questions} questions'
+        '</div>'
+        '</div>'
+
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
     MAX_CHARACTERS = 30000
 
     prepared_text = study_text[
@@ -848,7 +1350,6 @@ with st.container(border=True):
     if len(study_text) > MAX_CHARACTERS:
 
         st.info(
-            "This document is large. "
             "The first 30,000 characters will be used."
         )
 
@@ -894,6 +1395,7 @@ if generate_button:
 
             st.session_state.quiz = quiz
 
+
             st.session_state.quiz_config = {
                 "question_type": question_type,
                 "difficulty": difficulty,
@@ -913,9 +1415,11 @@ if generate_button:
                 "Please wait a moment and try again."
             )
 
+
             with st.expander(
                 "Technical details"
             ):
+
                 st.exception(error)
 
 
@@ -935,62 +1439,154 @@ if (
     )
 
 
-    st.write("")
-    st.write("")
-
-
-    st.markdown(
-        '<div class="workspace-badge">Active quiz</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="workspace-title">Test what you know</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        (
-            '<div class="workspace-copy">'
-            'Answer each question and submit when you are ready. '
-            'Your score and answer review will appear immediately.'
-            '</div>'
-        ),
-        unsafe_allow_html=True
-    )
-
-
-    info1, info2, info3 = st.columns(3)
-
-
-    with info1:
-        st.metric(
-            "Questions",
+    answered_count = sum(
+        1
+        for index in range(
             len(quiz)
         )
+        if st.session_state.get(
+            f"question_{index}"
+        ) is not None
+    )
 
 
-    with info2:
-        st.metric(
-            "Difficulty",
-            quiz_config.get(
-                "difficulty",
-                difficulty
+    remaining_count = (
+        len(quiz)
+        - answered_count
+    )
+
+
+    completion_percent = (
+        int(
+            (
+                answered_count
+                / len(quiz)
             )
+            * 100
         )
-
-
-    with info3:
-        st.metric(
-            "Format",
-            quiz_config.get(
-                "question_type",
-                question_type
-            )
-        )
+        if len(quiz) > 0
+        else 0
+    )
 
 
     st.write("")
+    st.write("")
+
+
+    analytics_html = (
+        '<div class="analytics-board">'
+
+        '<div class="analytics-top">'
+
+        '<div>'
+
+        '<div class="analytics-badge">'
+        'Active Quiz'
+        '</div>'
+
+        '<div class="analytics-title">'
+        'Quiz Dashboard'
+        '</div>'
+
+        '<div class="analytics-subtitle">'
+        'Track your progress and complete each question '
+        'before submitting your assessment.'
+        '</div>'
+
+        '</div>'
+
+        '<div class="analytics-chip-row">'
+        '<span class="analytics-chip">'
+        'Live progress'
+        '</span>'
+        '<span class="analytics-chip">'
+        'Instant scoring'
+        '</span>'
+        '<span class="analytics-chip">'
+        'Answer review'
+        '</span>'
+        '</div>'
+
+        '</div>'
+
+        '<div class="analytics-grid">'
+
+        '<div class="analytics-card">'
+        '<div class="analytics-label">'
+        'Questions'
+        '</div>'
+        f'<div class="analytics-value">'
+        f'{len(quiz)}'
+        '</div>'
+        '<div class="analytics-note">'
+        'Total assessment items'
+        '</div>'
+        '</div>'
+
+        '<div class="analytics-card">'
+        '<div class="analytics-label">'
+        'Difficulty'
+        '</div>'
+        '<div class="analytics-value '
+        'analytics-gradient-value">'
+        f'{quiz_config.get("difficulty", difficulty)}'
+        '</div>'
+        '<div class="analytics-note">'
+        'Challenge level'
+        '</div>'
+        '</div>'
+
+        '<div class="analytics-card">'
+        '<div class="analytics-label">'
+        'Format'
+        '</div>'
+        '<div class="analytics-value '
+        'analytics-value-small">'
+        f'{quiz_config.get("question_type", question_type)}'
+        '</div>'
+        '<div class="analytics-note">'
+        'Question structure'
+        '</div>'
+        '</div>'
+
+        '<div class="analytics-card">'
+        '<div class="analytics-label">'
+        'Completion'
+        '</div>'
+        f'<div class="analytics-value">'
+        f'{completion_percent}%'
+        '</div>'
+        '<div class="analytics-note">'
+        f'{answered_count} answered · '
+        f'{remaining_count} remaining'
+        '</div>'
+        '</div>'
+
+        '</div>'
+
+        '<div class="analytics-progress-top">'
+        '<span>Quiz progress</span>'
+        f'<span>{answered_count} / {len(quiz)}</span>'
+        '</div>'
+
+        '</div>'
+    )
+
+
+    st.markdown(
+        analytics_html,
+        unsafe_allow_html=True
+    )
+
+
+    st.progress(
+        answered_count
+        / len(quiz)
+    )
+
+
+    st.write("")
+
 
     user_answers = {}
 
@@ -1007,9 +1603,11 @@ if (
                 f"QUESTION {index + 1} OF {len(quiz)}"
             )
 
+
             st.markdown(
                 f"### {question['question']}"
             )
+
 
             selected_answer = st.radio(
                 "Choose an answer",
@@ -1019,33 +1617,10 @@ if (
                 label_visibility="collapsed"
             )
 
+
             user_answers[
                 index
             ] = selected_answer
-
-
-    answered_count = sum(
-        answer is not None
-        for answer in user_answers.values()
-    )
-
-
-    completion = (
-        answered_count
-        / len(quiz)
-    )
-
-
-    st.write("")
-
-    st.caption(
-        f"{answered_count} of "
-        f"{len(quiz)} questions answered"
-    )
-
-    st.progress(
-        completion
-    )
 
 
     submit_button = st.button(
@@ -1071,6 +1646,7 @@ if (
                 "Answer all questions before submitting."
             )
 
+
             st.caption(
                 "Unanswered questions: "
                 + ", ".join(
@@ -1089,9 +1665,13 @@ if (
                 user_answers
             )
 
+
             st.session_state.score = score
+
             st.session_state.results = results
+
             st.session_state.quiz_submitted = True
+
 
             st.rerun()
 
@@ -1102,101 +1682,208 @@ if st.session_state.get(
 ):
 
     score = st.session_state.score
+
     results = st.session_state.results
+
     quiz = st.session_state.quiz
+
 
     total = len(quiz)
 
+    correct = score
+
+    incorrect = total - score
+
     percentage = (
-        score / total
+        score
+        / total
     ) * 100
-
-
-    st.write("")
-    st.write("")
-
-
-    st.markdown(
-        '<div class="workspace-badge">Performance</div>',
-        unsafe_allow_html=True
-    )
-
-    st.markdown(
-        '<div class="workspace-title">Quiz results</div>',
-        unsafe_allow_html=True
-    )
 
 
     if percentage >= 80:
 
-        st.success(
+        status_class = "good"
+
+        performance_label = "Excellent"
+
+        status_text = (
             "Strong performance. "
-            "You demonstrated a good understanding "
-            "of this material."
+            "You demonstrated a very good "
+            "understanding of this material."
         )
 
 
     elif percentage >= 60:
 
-        st.info(
-            "Good progress. Review the questions "
-            "you missed and try another quiz."
+        status_class = "medium"
+
+        performance_label = "Good"
+
+        status_text = (
+            "Good progress. Review the missed questions "
+            "and strengthen the weaker areas."
         )
 
 
     else:
 
-        st.warning(
+        status_class = "low"
+
+        performance_label = "Needs Review"
+
+        status_text = (
             "More revision is recommended. "
             "Review the answers below before trying again."
         )
 
 
-    result1, result2, result3 = st.columns(3)
+    st.write("")
+    st.write("")
 
 
-    with result1:
-        st.metric(
-            "Score",
-            f"{score}/{total}"
-        )
+    results_html = (
+        '<div class="results-board">'
 
+        '<div class="results-top">'
 
-    with result2:
-        st.metric(
-            "Accuracy",
-            f"{percentage:.0f}%"
-        )
+        '<div>'
 
+        '<div class="results-badge">'
+        'Performance'
+        '</div>'
 
-    with result3:
-        st.metric(
-            "Incorrect",
-            total - score
-        )
+        '<div class="results-title">'
+        'Results Dashboard'
+        '</div>'
 
+        '<div class="results-subtitle">'
+        'Review your score, accuracy, '
+        'and answer performance.'
+        '</div>'
 
-    st.progress(
-        percentage / 100
+        '</div>'
+
+        '<div class="results-chip-row">'
+
+        f'<span class="results-chip">'
+        f'{performance_label}'
+        '</span>'
+
+        '<span class="results-chip">'
+        'Instant scoring'
+        '</span>'
+
+        '<span class="results-chip">'
+        'Answer review'
+        '</span>'
+
+        '</div>'
+
+        '</div>'
+
+        f'<div class="results-status {status_class}">'
+        f'{status_text}'
+        '</div>'
+
+        '<div class="results-grid">'
+
+        '<div class="results-card">'
+        '<div class="results-label">'
+        'Score'
+        '</div>'
+        f'<div class="results-value">'
+        f'{score}/{total}'
+        '</div>'
+        '<div class="results-note">'
+        'Final quiz score'
+        '</div>'
+        '</div>'
+
+        '<div class="results-card">'
+        '<div class="results-label">'
+        'Accuracy'
+        '</div>'
+        '<div class="results-value '
+        'results-gradient-value">'
+        f'{percentage:.0f}%'
+        '</div>'
+        '<div class="results-note">'
+        'Overall answer accuracy'
+        '</div>'
+        '</div>'
+
+        '<div class="results-card">'
+        '<div class="results-label">'
+        'Correct'
+        '</div>'
+        f'<div class="results-value">'
+        f'{correct}'
+        '</div>'
+        '<div class="results-note">'
+        'Correct responses'
+        '</div>'
+        '</div>'
+
+        '<div class="results-card">'
+        '<div class="results-label">'
+        'Incorrect'
+        '</div>'
+        f'<div class="results-value">'
+        f'{incorrect}'
+        '</div>'
+        '<div class="results-note">'
+        'Questions to review'
+        '</div>'
+        '</div>'
+
+        '</div>'
+
+        '<div class="results-progress-top">'
+        '<span>Overall performance</span>'
+        f'<span>{percentage:.0f}%</span>'
+        '</div>'
+
+        '</div>'
     )
 
 
-    st.write("")
-    st.write("")
-
-
     st.markdown(
-        '<div class="sub-title">Answer review</div>',
+        results_html,
         unsafe_allow_html=True
     )
 
+
+    st.progress(
+        percentage
+        / 100
+    )
+
+
+    st.write("")
+    st.write("")
+
+
     st.markdown(
-        (
-            '<div class="sub-copy">'
-            'Review incorrect responses and reinforce '
-            'the correct information.'
-            '</div>'
-        ),
+        '<div class="sub-label">'
+        'Review'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    st.markdown(
+        '<div class="sub-title">'
+        'Answer review'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+
+    st.markdown(
+        '<div class="sub-copy">'
+        'Review each response and compare it '
+        'with the correct answer.'
+        '</div>',
         unsafe_allow_html=True
     )
 
@@ -1224,6 +1911,7 @@ if st.session_state.get(
                     "Your answer was correct."
                 )
 
+
                 st.write(
                     "**Answer:** "
                     f"{result['correct_answer']}"
@@ -1236,10 +1924,12 @@ if st.session_state.get(
                     "Your answer was incorrect."
                 )
 
+
                 st.write(
                     "**Your answer:** "
                     f"{result['user_answer']}"
                 )
+
 
                 st.write(
                     "**Correct answer:** "
@@ -1264,6 +1954,7 @@ if st.session_state.get(
 st.write("")
 st.write("")
 st.divider()
+
 
 st.caption(
     "Quizora AI | AI-powered study quiz generator"
