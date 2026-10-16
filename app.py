@@ -149,26 +149,6 @@ st.markdown(
         }
     }
 
-    @keyframes buttonGlow {
-        0% {
-            box-shadow:
-                0 12px 30px rgba(99, 102, 241, 0.12),
-                0 0 0 rgba(56, 189, 248, 0);
-        }
-
-        50% {
-            box-shadow:
-                0 15px 38px rgba(124, 58, 237, 0.22),
-                0 0 25px rgba(56, 189, 248, 0.10);
-        }
-
-        100% {
-            box-shadow:
-                0 12px 30px rgba(99, 102, 241, 0.12),
-                0 0 0 rgba(56, 189, 248, 0);
-        }
-    }
-
     html {
         scroll-behavior: smooth;
     }
@@ -570,52 +550,25 @@ st.markdown(
 
     .go-to-quiz-button {
         display: inline-flex;
-
         align-items: center;
         justify-content: center;
-
         min-width: 140px;
-
-        padding: 0.72rem 1.15rem;
-
-        border-radius: 11px;
-
+        min-height: 50px;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        border: 1px solid #8875bd;
         text-decoration: none !important;
-
         color: #ffffff !important;
-
-        font-size: 0.86rem;
+        font-size: 0.95rem;
         font-weight: 700;
-
-        background:
-            linear-gradient(
-                100deg,
-                #7c3aed,
-                #6366f1,
-                #0ea5e9
-            );
-
-        background-size: 200% 200%;
-
-        animation:
-            gradientMove 7s ease infinite;
-
-        box-shadow:
-            0 10px 28px rgba(99, 102, 241, 0.18);
-
-        transition:
-            transform 0.15s ease,
-            box-shadow 0.15s ease;
+        background: #201a31;
+        transition: background-color 160ms ease, transform 160ms ease;
     }
 
     .go-to-quiz-button:hover {
+        background: #35294e;
+        border-color: #c4b5fd;
         transform: translateY(-1px);
-
-        box-shadow:
-            0 14px 34px rgba(99, 102, 241, 0.28);
-
-        color: #ffffff !important;
-
         text-decoration: none !important;
     }
 
@@ -1006,177 +959,115 @@ st.markdown(
         border-radius: 15px;
     }
 
+    /* Selections stay quiet; the next main action carries the strongest color. */
     .stButton > button {
         min-height: 50px;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: background-color 160ms ease, border-color 160ms ease,
+                    box-shadow 160ms ease, transform 160ms ease;
+    }
 
-        border-radius: 13px;
-
-        font-weight: 620;
-
-        transition:
-            transform 0.16s ease,
-            border-color 0.16s ease,
-            background 0.16s ease,
-            box-shadow 0.16s ease;
+    .stButton > button p {
+        font-weight: inherit;
+        line-height: 1.45;
     }
 
     .stButton > button[kind="secondary"] {
-        color: #e5e7eb !important;
-
-        background:
-            linear-gradient(
-                180deg,
-                rgba(255, 255, 255, 0.035),
-                rgba(255, 255, 255, 0.018)
-            ) !important;
-
-        border:
-            1px solid rgba(255, 255, 255, 0.09) !important;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.025);
+        color: #e2e8f0 !important;
+        background: #111722 !important;
+        border: 1px solid #465269 !important;
+        box-shadow: none;
     }
 
-    .stButton > button[kind="secondary"]:hover {
+    .stButton > button[kind="secondary"]:hover:not(:disabled) {
         color: #ffffff !important;
-
-        background:
-            linear-gradient(
-                100deg,
-                rgba(124, 58, 237, 0.09),
-                rgba(99, 102, 241, 0.055)
-            ) !important;
-
-        border-color:
-            rgba(129, 140, 248, 0.35) !important;
-
-        box-shadow:
-            0 8px 25px rgba(0, 0, 0, 0.14);
+        background: #1c2535 !important;
+        border-color: #94a3b8 !important;
     }
 
     .stButton > button[kind="primary"] {
-        color: #ffffff !important;
-
-        border:
-            1px solid rgba(167, 139, 250, 0.30) !important;
-
-        background:
-            linear-gradient(
-                100deg,
-                #7c3aed,
-                #6366f1,
-                #0ea5e9
-            ) !important;
-
-        background-size: 200% 200% !important;
-
-        animation:
-            gradientMove 7s ease infinite,
-            buttonGlow 4s ease-in-out infinite;
-
-        box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.14),
-            0 10px 28px rgba(99, 102, 241, 0.17);
+        color: #ede9fe !important;
+        background: #2e2254 !important;
+        border: 1px solid #a78bfa !important;
+        animation: none;
+        box-shadow: none;
     }
 
-    .stButton > button:hover {
+    .stButton > button[kind="primary"]:hover:not(:disabled) {
+        background: #3d2c6b !important;
+        border-color: #c4b5fd !important;
+    }
+
+    /* Three related actions: create, navigate, and finish. */
+    .st-key-generate_quiz_button button[kind="primary"],
+    .st-key-submit_quiz_button button[kind="primary"] {
+        min-height: 56px;
+        font-weight: 700;
+        gap: 0.65rem;
+        border-radius: 14px;
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.24);
+    }
+
+    .st-key-generate_quiz_button button[kind="primary"] {
+        color: #ffffff !important;
+        background: #6d3dc5 !important;
+        border-color: #a78bfa !important;
+    }
+
+    .st-key-generate_quiz_button button[kind="primary"]:hover:not(:disabled) {
+        background: #7c4bd6 !important;
+        border-color: #c4b5fd !important;
         transform: translateY(-1px);
     }
 
-    .st-key-generate_quiz_button button {
-        min-height: 55px !important;
-
-        color: #ffffff !important;
-
-        border:
-            1px solid rgba(56, 189, 248, 0.38) !important;
-
-        background:
-            linear-gradient(
-                100deg,
-                #2563eb,
-                #0ea5e9,
-                #06b6d4
-            ) !important;
-
-        background-size: 200% 200% !important;
-
-        animation:
-            gradientMove 7s ease infinite !important;
-
-        box-shadow:
-            0 12px 32px rgba(14, 165, 233, 0.20) !important;
-
-        font-weight: 700 !important;
+    .st-key-submit_quiz_button button[kind="primary"] {
+        color: #25163d !important;
+        background: #d7c5fa !important;
+        border-color: #e9ddff !important;
     }
 
-    .st-key-generate_quiz_button button:hover {
-        border-color:
-            rgba(103, 232, 249, 0.65) !important;
-
-        box-shadow:
-            0 16px 40px rgba(14, 165, 233, 0.30) !important;
-    }
-
-    .st-key-submit_quiz_button button {
-        min-height: 57px !important;
-
-        color: #ffffff !important;
-
-        border:
-            1px solid rgba(251, 191, 36, 0.42) !important;
-
-        background:
-            linear-gradient(
-                100deg,
-                #b45309,
-                #d97706,
-                #f59e0b
-            ) !important;
-
-        background-size: 200% 200% !important;
-
-        animation:
-            gradientMove 7s ease infinite !important;
-
-        box-shadow:
-            0 12px 34px rgba(245, 158, 11, 0.20) !important;
-
-        font-weight: 700 !important;
-
-        border-radius: 13px !important;
-    }
-
-    .st-key-submit_quiz_button button:hover {
+    .st-key-submit_quiz_button button[kind="primary"]:hover:not(:disabled) {
+        background: #e9ddff !important;
+        border-color: #f5efff !important;
         transform: translateY(-1px);
-
-        border-color:
-            rgba(253, 224, 71, 0.65) !important;
-
-        box-shadow:
-            0 17px 42px rgba(245, 158, 11, 0.32) !important;
     }
 
-    .st-key-create_another_quiz button {
-        background:
-            rgba(255, 255, 255, 0.035) !important;
+    .go-to-quiz-button {
+        gap: 0.75rem;
+    }
 
-        color: #e2e8f0 !important;
+    .go-to-quiz-button::after {
+        content: "";
+        width: 0.45rem;
+        height: 0.45rem;
+        border-top: 2px solid currentColor;
+        border-right: 2px solid currentColor;
+        transform: rotate(45deg);
+        flex-shrink: 0;
+    }
 
-        border:
-            1px solid rgba(255, 255, 255, 0.10) !important;
+    .stButton > button:focus-visible,
+    .go-to-quiz-button:focus-visible {
+        outline: 3px solid #ddd0ff !important;
+        outline-offset: 4px;
+    }
 
+    .stButton > button:active:not(:disabled),
+    .go-to-quiz-button:active {
+        transform: translateY(1px) !important;
         box-shadow: none !important;
-
-        animation: none !important;
     }
 
-    .st-key-create_another_quiz button:hover {
-        background:
-            rgba(124, 58, 237, 0.08) !important;
-
-        border-color:
-            rgba(129, 140, 248, 0.35) !important;
+    .stButton > button[kind]:disabled {
+        color: #a1aec0 !important;
+        background: #202938 !important;
+        border-color: #465269 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        cursor: not-allowed;
+        opacity: 1;
     }
 
     [data-testid="stProgress"] > div > div {
@@ -1189,6 +1080,12 @@ st.markdown(
     }
 
     @media (prefers-reduced-motion: reduce) {
+        .stButton > button,
+        .go-to-quiz-button {
+            transition: none !important;
+            transform: none !important;
+        }
+
         .hero-title,
         .hero-wrap::before,
         .analytics-gradient-value,
@@ -1636,33 +1533,6 @@ if generate_button:
             }
 
 
-            st.markdown(
-                (
-                    '<div class="quiz-ready-panel">'
-
-                    '<div>'
-
-                    '<div class="quiz-ready-title">'
-                    'Quiz generated successfully'
-                    '</div>'
-
-                    '<div class="quiz-ready-text">'
-                    f'{len(quiz)} questions are ready to answer.'
-                    '</div>'
-
-                    '</div>'
-
-                    '<a class="go-to-quiz-button" '
-                    'href="#quiz-dashboard">'
-                    'Go to quiz'
-                    '</a>'
-
-                    '</div>'
-                ),
-                unsafe_allow_html=True
-            )
-
-
         except Exception as error:
 
             st.error(
@@ -1693,6 +1563,34 @@ if (
     quiz_config = st.session_state.get(
         "quiz_config",
         {}
+    )
+
+
+    # Keep this panel stable across answer-selection reruns to avoid a layout jump.
+    st.markdown(
+        (
+            '<div class="quiz-ready-panel">'
+
+            '<div>'
+
+            '<div class="quiz-ready-title">'
+            'Quiz generated successfully'
+            '</div>'
+
+            '<div class="quiz-ready-text">'
+            f'{len(quiz)} questions are ready to answer.'
+            '</div>'
+
+            '</div>'
+
+            '<a class="go-to-quiz-button" '
+            'href="#quiz-dashboard">'
+            'Go to quiz'
+            '</a>'
+
+            '</div>'
+        ),
+        unsafe_allow_html=True
     )
 
 
@@ -1987,7 +1885,7 @@ if st.session_state.get(
 
         status_text = (
             "More revision is recommended. Review the answers "
-            "below before trying again."
+            "above before trying again."
         )
 
 
@@ -2088,21 +1986,6 @@ if st.session_state.get(
 
 
     st.markdown(
-        results_html,
-        unsafe_allow_html=True
-    )
-
-
-    st.progress(
-        percentage / 100
-    )
-
-
-    st.write("")
-    st.write("")
-
-
-    st.markdown(
         '<div class="sub-label">Review</div>',
         unsafe_allow_html=True
     )
@@ -2174,6 +2057,21 @@ if st.session_state.get(
                 )
 
 
+    st.write("")
+
+
+    st.markdown(
+        results_html,
+        unsafe_allow_html=True
+    )
+
+
+    st.progress(
+        percentage / 100
+    )
+
+
+    st.write("")
     st.write("")
 
 
