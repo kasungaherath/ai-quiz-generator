@@ -245,8 +245,10 @@ st.markdown(
     .hero-wrap {
         position: relative;
         isolation: isolate;
+        width: 100%;
         max-width: 900px;
-        margin: 0 auto 4rem auto;
+        margin: 0 0 4rem;
+        text-align: left;
     }
 
     .hero-wrap::before {
@@ -276,12 +278,13 @@ st.markdown(
 
     .hero-title {
         max-width: 850px;
-        margin-bottom: 1.3rem;
+        margin: 0 0 1.5rem;
+        text-wrap: balance;
 
         font-size: clamp(2.8rem, 5vw, 4.4rem);
         font-weight: 800;
-        letter-spacing: -0.058em;
-        line-height: 1.04;
+        letter-spacing: -0.035em;
+        line-height: 1.1;
 
         background:
             linear-gradient(
@@ -308,15 +311,21 @@ st.markdown(
     }
 
     .hero-copy {
-        max-width: 780px;
+        max-width: 720px;
+        margin: 0 0 1.5rem;
+        text-wrap: pretty;
         color: #a1a8b5;
         font-size: 1.06rem;
-        line-height: 1.8;
-        margin-bottom: 1.25rem;
+        line-height: 1.75;
     }
 
     .hero-meta {
-        color: #69717f;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0.5rem 1.5rem;
+        color: #929baa;
         font-size: 0.86rem;
         font-weight: 500;
     }
@@ -1129,10 +1138,6 @@ st.markdown(
             margin-bottom: 2.5rem;
         }
 
-        .hero-title {
-            font-size: 2.65rem;
-        }
-
         .hero-wrap {
             margin-bottom: 3rem;
         }
@@ -1232,9 +1237,9 @@ st.markdown(
         'with a complete answer review.'
         '</div>'
         '<div class="hero-meta">'
-        'PDF and text input &nbsp;&nbsp;|&nbsp;&nbsp; '
-        'Multiple quiz formats &nbsp;&nbsp;|&nbsp;&nbsp; '
-        'Instant scoring'
+        '<span>PDF and text input</span>'
+        '<span>Multiple quiz formats</span>'
+        '<span>Instant scoring</span>'
         '</div>'
         '</div>'
     ),

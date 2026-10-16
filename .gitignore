@@ -9,3 +9,15 @@ __pycache__/
 .idea/
 
 .DS_Store
+# Local AI tooling
+.agents/
+.codex/
+.impeccable/
+
+# Local environments and caches
+.venv/
+.pytest_cache/
+.ruff_cache/
+.env.*
+!.env.example
+Thumbs.db
